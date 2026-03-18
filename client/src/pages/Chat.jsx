@@ -112,8 +112,8 @@ export default function Chat() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 h-[calc(100vh-5rem)]">
       <div className="flex h-full gap-4">
-        {/* Conversation list */}
-        <aside className="w-72 flex-shrink-0 card flex flex-col overflow-hidden">
+        {/* Conversation list — full screen on mobile when no conversation selected */}
+        <aside className={`flex-shrink-0 card flex flex-col overflow-hidden w-full md:w-72 ${conversationId ? 'hidden md:flex' : 'flex'}`}>
           <div className="p-3 border-b border-gray-100 flex items-center gap-2">
             <BackButton />
             <h2 className="font-bold text-gray-900">{t('chat.messages')}</h2>
@@ -143,12 +143,17 @@ export default function Chat() {
           </div>
         </aside>
 
-        {/* Message thread */}
-        <div className="flex-1 card flex flex-col overflow-hidden">
+        {/* Message thread — full screen on mobile when conversation selected */}
+        <div className={`flex-1 card flex flex-col overflow-hidden ${conversationId ? 'flex' : 'hidden md:flex'}`}>
           {conversationId && conv ? (
             <>
               {/* Header */}
               <div className="p-3 border-b border-gray-100 flex items-center gap-3">
+                <Link to="/messages" className="md:hidden p-1 rounded-lg hover:bg-gray-100 text-gray-500">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </Link>
                 <Avatar src={conv.buyer?.id === user?.id ? conv.seller?.avatar : conv.buyer?.avatar}
                         name={conv.buyer?.id === user?.id ? conv.seller?.name : conv.buyer?.name} size="sm" />
                 <div>

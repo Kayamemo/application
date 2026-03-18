@@ -250,7 +250,7 @@ export default function Home() {
             {t('hero.badge')}
           </div>
 
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-6 leading-[1.05]">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-6 leading-[1.05]">
             {t('hero.headline1')}<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-300 to-primary-300">
               {t('hero.headline2')}
@@ -264,14 +264,14 @@ export default function Home() {
           {/* ── Big search bar with location picker ── */}
           <div className="max-w-2xl mx-auto mb-10">
             <form onSubmit={handleSearch}>
-              <div className="flex items-center bg-white rounded-2xl shadow-2xl overflow-visible">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-white rounded-2xl shadow-2xl overflow-visible">
 
                 {/* Location picker */}
                 <div className="relative flex-shrink-0" ref={locRef}>
                   <button
                     type="button"
                     onClick={() => setLocOpen((o) => !o)}
-                    className="flex items-center gap-2 px-4 py-4 border-r border-gray-200 hover:bg-gray-50 transition-colors rounded-l-2xl"
+                    className="flex items-center gap-2 px-4 py-4 border-b sm:border-b-0 sm:border-r border-gray-200 hover:bg-gray-50 transition-colors rounded-t-2xl sm:rounded-t-none sm:rounded-l-2xl w-full sm:w-auto"
                     style={{ color: coords ? '#4f46e5' : '#6b7280' }}
                   >
                     <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -279,7 +279,7 @@ export default function Home() {
                         d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <span className="text-sm font-medium max-w-[110px] truncate">
+                    <span className="text-sm font-medium max-w-[70px] sm:max-w-[110px] truncate">
                       {coords ? `${locationLabel} · ${radius} km` : t('hero.anywhere')}
                     </span>
                     <svg className="w-3.5 h-3.5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -289,7 +289,7 @@ export default function Home() {
 
                   {/* Location dropdown — NOT a nested form, uses div + onKeyDown */}
                   {locOpen && (
-                    <div className="absolute top-full left-0 mt-3 w-80 card shadow-2xl z-50 p-5 animate-fade-up text-gray-900">
+                    <div className="absolute top-full left-0 mt-3 w-[calc(100vw-2rem)] sm:w-80 card shadow-2xl z-50 p-5 animate-fade-up text-gray-900">
                       <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{t('location.title')}</p>
 
                       {/* City input — plain div to avoid nested-form issue */}

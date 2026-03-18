@@ -50,6 +50,7 @@ export default function Explore() {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [geoLoading, setGeoLoading] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Shared geo filter state (synced with Navbar via localStorage)
   const { coords, locationLabel, radius, setLocation, setRadius, clearLocation } = useGeoFilter();
@@ -207,10 +208,24 @@ export default function Explore() {
         </div>
       )}
 
+      {/* Mobile filter toggle button */}
+      <div className="md:hidden mb-4">
+        <button
+          onClick={() => setFiltersOpen((o) => !o)}
+          className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 shadow-sm"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+          </svg>
+          {t('explore.filters')}
+          {filtersOpen ? ' ▲' : ' ▼'}
+        </button>
+      </div>
+
       <div className="flex flex-col md:flex-row gap-6">
 
         {/* ── Sidebar filters ──────────────────────────── */}
-        <aside className="md:w-60 flex-shrink-0">
+        <aside className={`md:w-60 flex-shrink-0 ${filtersOpen ? 'block' : 'hidden'} md:block`}>
           <div className="card p-4 space-y-5 sticky top-20">
             <h2 className="font-bold text-gray-900">{t('explore.filters')}</h2>
 
