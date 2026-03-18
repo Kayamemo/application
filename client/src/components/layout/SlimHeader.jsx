@@ -2,7 +2,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../contexts/AuthContext';
+import { messagesAPI } from '../../services/api';
 import Avatar from '../ui/Avatar';
 import LangToggle from '../ui/LangToggle';
 
@@ -12,6 +14,14 @@ export default function SlimHeader() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
+
+  const { data: conversations = [] } = useQuery({
+    queryKey: ['conversations'],
+    queryFn: () => messagesAPI.conversations().then((r) => r.data),
+    enabled: !!user,
+    refetchInterval: 15000,
+  });
+  const unreadCount = conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
 
   useEffect(() => {
     const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
@@ -33,8 +43,15 @@ export default function SlimHeader() {
           <LangToggle variant="dark" />
           {user ? (
             <>
-              <Link to="/messages" className="text-sm text-gray-500 hover:text-gray-800 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors hidden sm:block">
-                {t('nav.messages')}
+              <Link to="/messages" className="relative p-2 rounded-xl hover:bg-gray-100 transition-all">
+                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                </svg>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1 animate-pulse">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
               </Link>
               <div className="relative">
                 <button

@@ -2,7 +2,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { nichesAPI, servicesAPI } from '../services/api';
+import { nichesAPI, servicesAPI, messagesAPI } from '../services/api';
 import { useGeoFilter } from '../hooks/useGeoFilter';
 import { useAuth } from '../contexts/AuthContext';
 import ServiceCard from '../components/ui/ServiceCard';
@@ -107,6 +107,14 @@ export default function Home() {
     queryFn: () => servicesAPI.search({ limit: 8, sort: 'rating' }).then((r) => r.data),
   });
 
+  const { data: conversations = [] } = useQuery({
+    queryKey: ['conversations'],
+    queryFn: () => messagesAPI.conversations().then((r) => r.data),
+    enabled: !!user,
+    refetchInterval: 15000,
+  });
+  const unreadCount = conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
+
   const handleSearch = (e) => {
     e.preventDefault();
     setSuggestions([]); setShowSuggestions(false);
@@ -176,6 +184,17 @@ export default function Home() {
           <div className="flex items-center gap-2" ref={userMenuRef}>
             <LangToggle variant="light" />
             {user ? (
+              <>
+              <Link to="/messages" className="relative p-2 rounded-xl hover:bg-white/10 transition-all">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                </svg>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1 animate-pulse">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </Link>
               <div className="relative">
                 <button
                   onClick={() => setUserMenuOpen((o) => !o)}
@@ -213,6 +232,7 @@ export default function Home() {
                   </div>
                 )}
               </div>
+              </>
             ) : (
               <>
                 <Link to="/login"    className="text-sm text-white/70 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors">{t('nav.login')}</Link>
