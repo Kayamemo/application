@@ -1,0 +1,375 @@
+export default {
+  // ── Navbar / SlimHeader ───────────────────────────────
+  nav: {
+    messages:   'Messages',
+    login:      'Log in',
+    getStarted: 'Get started',
+    myOrders:   'My Orders',
+    browse:     'Browse Services',
+    sellerDash: 'Seller Dashboard',
+    adminPanel: 'Admin Panel',
+    logout:     'Log out',
+  },
+
+  // ── Hero ─────────────────────────────────────────────
+  hero: {
+    badge:             'Trusted by thousands of locals',
+    headline1:         'Find local services,',
+    headline2:         'done right.',
+    subline:           'From gardening to tutoring — hire trusted locals for any task, with secure payments and real-time chat.',
+    searchPlaceholder: 'What do you need help with?',
+    search:            'Search',
+    anywhere:          'Anywhere',
+  },
+
+  // ── Location picker ───────────────────────────────────
+  location: {
+    title:         'Choose your location',
+    placeholder:   'City or neighbourhood…',
+    go:            'Go',
+    useMyLocation: 'Use my current location',
+    searchWithin:  'Search within',
+    clearLocation: '✕ Clear location',
+    setTip:        'Set your location to find services near you',
+  },
+
+  // ── Quick tags ────────────────────────────────────────
+  tags: {
+    gardening:   '🌱 Gardening',
+    tutoring:    '📚 Tutoring',
+    cleaning:    '🧹 Cleaning',
+    petCare:     '🐾 Pet Care',
+    photography: '📷 Photography',
+  },
+
+  // ── Stats ─────────────────────────────────────────────
+  stats: {
+    servicesListed: 'Services listed',
+    satisfaction:   'Satisfaction rate',
+    sellers:        'Verified sellers',
+  },
+
+  // ── Home sections ─────────────────────────────────────
+  categories: {
+    label:    '✦ Browse Categories',
+    heading:  'What do you need?',
+    services: 'services',
+  },
+
+  featured: {
+    label:     '⭐ Top Picks',
+    heading:   'Popular services',
+    viewAll:   'View all →',
+    empty:     'No services yet',
+    emptyHint: 'Be the first to list one!',
+  },
+
+  howItWorks: {
+    label:   '💡 Simple process',
+    heading: 'How Kaya works',
+    steps: [
+      { step: '01', title: 'Browse & discover', desc: 'Search services by category, location, price, and reviews.' },
+      { step: '02', title: 'Connect & discuss', desc: 'Chat with sellers directly before placing your order.' },
+      { step: '03', title: 'Pay securely',       desc: "Funds held in escrow — released only when you're satisfied." },
+    ],
+  },
+
+  cta: {
+    label:   '💼 For providers',
+    heading: 'Earn doing what you love',
+    subline: 'Join hundreds of local providers. Start your 14-day free trial — just $7/month after.',
+    button:  'Start selling',
+  },
+
+  // ── Explore page ──────────────────────────────────────
+  explore: {
+    filters:         'Filters',
+    category:        'Category',
+    all:             'All',
+    priceRange:      'Price Range',
+    minPlaceholder:  'Min',
+    maxPlaceholder:  'Max',
+    remoteOnly:      'Remote only',
+    location:        'Location',
+    within:          'Within',
+    useMyLocation:   'Use my location',
+    cityPlaceholder: 'City or area…',
+    servicesFound:   '{{count}} services found',
+    noServices:      'No services found',
+    noServicesTip:   'Try adjusting your filters or search term',
+    noServicesGeo:   'No services within {{radius}} km of {{location}}. Try a larger radius.',
+    nearLabel:       'near {{location}}',
+    allServices:     'All Services',
+    services:        'Services',
+    resultsFor:      'Results for "{{q}}"',
+    page:            'Page',
+    of:              'of',
+    prev:            '← Prev',
+    next:            'Next →',
+    sort: {
+      newest:    'Newest',
+      topRated:  'Top Rated',
+      priceLow:  'Price: Low → High',
+      priceHigh: 'Price: High → Low',
+    },
+  },
+
+  // ── Subscribe ─────────────────────────────────────────
+  subscribe: {
+    plan:         '$7 / month',
+    manage:       'Manage Billing →',
+    subscribeNow: 'Subscribe Now',
+  },
+
+  // ── Auth ─────────────────────────────────────────────
+  auth: {
+    login: {
+      title:         'Welcome back',
+      subtitle:      'Sign in to your account',
+      email:         'Email address',
+      password:      'Password',
+      forgot:        'Forgot password?',
+      submit:        'Sign in',
+      submitting:    'Signing in…',
+      noAccount:     "Don't have an account?",
+      createFree:    'Create one free',
+      panelHeadline: 'Your community,\nyour marketplace.',
+      panelSubline:  'Connect with trusted local service providers.',
+      statServices:  'Services',
+      statSatisfy:   'Satisfaction',
+      statBrowse:    'To browse',
+      welcomeBack:   'Welcome back!',
+      invalidCreds:  'Invalid email or password',
+    },
+    register: {
+      title:              'Create account',
+      subtitle:           'Join thousands of buyers and sellers',
+      buyerLabel:         '🛒 I want to hire',
+      buyerSub:           'Browse & buy services',
+      sellerLabel:        '💼 I want to sell',
+      sellerSub:          'List your services',
+      fullName:           'Full name',
+      email:              'Email address',
+      password:           'Password',
+      pwPlaceholder:      'At least 8 characters',
+      pwError:            'Password must be at least 8 characters',
+      sellerTrial:        '14-day free trial, then just $7/month. Cancel anytime.',
+      referralApplied:    'Referral code applied:',
+      submit:             'Create account',
+      submitting:         'Creating account…',
+      termsText:          'By signing up, you agree to our',
+      terms:              'Terms',
+      and:                'and',
+      privacy:            'Privacy Policy',
+      haveAccount:        'Already have an account?',
+      signIn:             'Sign in',
+      welcome:            'Welcome to Kaya! 🎉',
+      failed:             'Registration failed',
+      features: [
+        { icon: '🔒', title: 'Secure payments',   desc: 'Escrow-protected — pay only when satisfied.' },
+        { icon: '💬', title: 'Direct messaging',  desc: 'Chat with sellers before committing.' },
+        { icon: '⭐', title: 'Verified reviews',  desc: 'Only real buyers can leave reviews.' },
+      ],
+    },
+  },
+
+  // ── Buyer Dashboard ───────────────────────────────────
+  buyerDash: {
+    title:         'My Orders',
+    browse:        'Browse Services',
+    all:           'All',
+    seller:        'Seller:',
+    amount:        'Amount:',
+    ordered:       'Ordered:',
+    due:           'Due:',
+    chat:          '💬 Chat',
+    accept:        '✓ Accept',
+    dispute:       '⚠ Dispute',
+    disputePrompt: 'Reason for dispute:',
+    review:        '★ Review',
+    reviewed:      'Reviewed',
+    empty:         'No orders yet',
+    emptyHint:     'Browse services to get started',
+    reviewModal: {
+      title:       'Leave a Review',
+      rating:      'Rating',
+      placeholder: 'Share your experience…',
+      cancel:      'Cancel',
+      submit:      'Submit',
+    },
+    toasts: {
+      complete:     'Order marked as complete! Payment released to seller.',
+      completeFail: 'Failed to complete order',
+      dispute:      'Dispute opened. An admin will review it.',
+      disputeFail:  'Failed to open dispute',
+      review:       'Review submitted!',
+      reviewFail:   'Failed to submit review',
+    },
+  },
+
+  // ── Seller Dashboard ──────────────────────────────────
+  sellerDash: {
+    title:      'Seller Dashboard',
+    newService: '+ New Service',
+    tabs: {
+      orders:       '📦 Orders',
+      services:     '🛠️ My Services',
+      earnings:     '💰 Earnings',
+      subscription: '⚡ Subscription',
+    },
+    orders: {
+      empty:         'No orders yet',
+      buyer:         'Buyer:',
+      earnings:      'Earnings:',
+      due:           'Due:',
+      na:            'N/A',
+      chat:          '💬 Chat',
+      markDelivered: 'Mark Delivered',
+      delivered:     'Order marked as delivered!',
+    },
+    services: {
+      empty:       'No services yet.',
+      createFirst: 'Create your first service',
+      orders:      'orders',
+      from:        'From',
+      view:        'View',
+      pause:       'Pause',
+      activate:    'Activate',
+      active:      'Active',
+      paused:      'Paused',
+    },
+    earnings: {
+      total:    'Total Earned',
+      escrow:   'In Escrow',
+      released: 'Released',
+      note:     'Escrow funds are released automatically when buyers confirm delivery.',
+    },
+    subscription: {
+      title:      'Seller Subscription',
+      status:     'Status',
+      renewsEnds: 'Renews / Ends',
+      trialEnds:  'Trial ends',
+      plan:       'Plan',
+      planValue:  '$7 / month',
+      manage:     'Manage Billing →',
+      subscribe:  'Subscribe Now',
+    },
+  },
+
+  // ── Chat ─────────────────────────────────────────────
+  chat: {
+    messages:          'Messages',
+    noConversations:   'No conversations yet',
+    noMessages:        'No messages yet',
+    typing:            '{{name}} is typing…',
+    selectConversation:'Select a conversation',
+    selectHint:        'Or start one from a service page',
+    inputPlaceholder:  'Type a message…',
+    re:                're:',
+    viewFile:          'View file',
+  },
+
+  // ── Checkout ──────────────────────────────────────────
+  checkout: {
+    title:                'Checkout',
+    orderSummary:         'Order Summary',
+    package:              'package',
+    daysDelivery:         'days delivery',
+    total:                'Total',
+    escrowNote:           '💰 Funds held in escrow until you confirm delivery.',
+    requirementsLabel:    'Requirements for the seller',
+    requirementsOptional: '(optional)',
+    requirementsPlaceholder: 'Describe what you need, any specific details or preferences…',
+    paymentDetails:       'Payment details',
+    pay:                  'Pay',
+    processing:           'Processing…',
+    toasts: {
+      placed:       'Order placed! 🎉',
+      paymentFailed:'Payment failed. Please try again.',
+      createFailed: 'Failed to create order',
+    },
+  },
+
+  // ── Service Detail ────────────────────────────────────
+  detail: {
+    notFound:         'Service not found',
+    home:             'Home',
+    aboutService:     'About This Service',
+    aboutSeller:      'About the Seller',
+    location:         'Location',
+    responseTime:     'Response time',
+    ordersCompleted:  'Orders completed',
+    memberSince:      'Member since',
+    notSpecified:     'Not specified',
+    na:               'N/A',
+    reviews:          'Reviews',
+    sellerReply:      "Seller's reply",
+    ownService:       'This is your service',
+    contactSeller:    '💬 Contact Seller',
+    remote:           '🌐 Remote',
+    inPerson:         'In-person',
+    availability:     'Availability',
+    contactForDetails:'Contact for details',
+    days:             'day',
+    daysPlural:       'days',
+    revision:         'revision',
+    revisionsPlural:  'revisions',
+    continue:         'Continue',
+    noConversation:   'Could not start conversation',
+  },
+
+  // ── Seller Profile ────────────────────────────────────
+  profile: {
+    notFound:       'Seller not found',
+    reviews:        'reviews',
+    orders:         'Orders',
+    completion:     'Completion',
+    reviewsSection: 'Reviews',
+    about:          'About',
+    skills:         'Skills',
+    languages:      'Languages',
+    portfolio:      'Portfolio',
+    services:       'Services',
+  },
+
+  // ── Footer ────────────────────────────────────────────
+  footer: {
+    tagline:         'The local services marketplace connecting your community.',
+    exploreTitle:    'Explore',
+    sellersTitle:    'Sellers',
+    companyTitle:    'Company',
+    becomeSeller:    'Become a seller',
+    sellerDashboard: 'Seller dashboard',
+    about:           'About',
+    privacy:         'Privacy Policy',
+    terms:           'Terms of Service',
+    copyright:       '© {{year}} Kaya Marketplace. All rights reserved.',
+    operational:     'All systems operational',
+    niches: {
+      gardening:  '🌱 Gardening',
+      tutoring:   '📚 Tutoring',
+      babysitting:'👶 Babysitting',
+      cleaning:   '🧹 Cleaning',
+    },
+  },
+
+  // ── Service Card ──────────────────────────────────────
+  card: {
+    noReviews: 'No reviews yet',
+    from:      'From',
+  },
+
+  // ── Niche names (keyed by slug, hyphens → underscores) ─
+  niches: {
+    gardening:         'Gardening',
+    craftwork:         'Craftwork',
+    tutoring:          'Tutoring',
+    babysitting:       'Babysitting',
+    cleaning:          'Cleaning',
+    pet_care:          'Pet Care',
+    photography:       'Photography',
+    personal_training: 'Personal Training',
+    home_repairs:      'Home Repairs',
+    cooking:           'Cooking',
+  },
+};
