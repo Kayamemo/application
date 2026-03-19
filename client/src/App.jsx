@@ -1,7 +1,14 @@
 // ============================================================
 // App — Router + Protected Route + Layout
 // ============================================================
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  return null;
+}
 import { useAuth } from './contexts/AuthContext';
 import SlimHeader from './components/layout/SlimHeader';
 import Footer from './components/layout/Footer';
@@ -62,6 +69,7 @@ function MainLayoutWithHeader() {
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         {/* Home — no header, hero has its own nav */}
         <Route element={<MainLayout />}>
