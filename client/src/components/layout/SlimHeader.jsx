@@ -36,7 +36,7 @@ export default function SlimHeader() {
   return (
     <header className="glass border-b border-white/30 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center">
-        <div className="flex-1">
+        <div className="md:flex-1">
         <Link to="/" className="flex items-center gap-2 w-fit">
           <div className="w-7 h-7 rounded-xl bg-indigo-600 flex items-center justify-center shadow-md">
             <span className="text-white font-black text-xs">K</span>
@@ -111,7 +111,7 @@ export default function SlimHeader() {
           })}
         </nav>
 
-        <div className="flex-1 flex items-center justify-end gap-2" ref={ref}>
+        <div className="ml-auto md:flex-1 flex items-center justify-end gap-2" ref={ref}>
           <span className="hidden sm:block"><LangToggle variant="dark" /></span>
           {user ? (
             <>
@@ -153,8 +153,11 @@ export default function SlimHeader() {
             </>
           ) : (
             <>
-              <Link to="/login"    className="text-sm text-gray-600 hover:text-gray-900 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors">{t('nav.login')}</Link>
-              <Link to="/register" className="btn-primary text-sm py-1.5 px-4">{t('nav.getStarted')}</Link>
+              <Link to="/login"    className="text-sm text-gray-600 hover:text-gray-900 px-2.5 py-1.5 rounded-lg hover:bg-gray-100 transition-colors">{t('nav.login')}</Link>
+              <Link to="/register" className="btn-primary text-sm py-1.5 px-3">
+                <span className="hidden sm:inline">{t('nav.getStarted')}</span>
+                <span className="sm:hidden">Sign up</span>
+              </Link>
             </>
           )}
         </div>
