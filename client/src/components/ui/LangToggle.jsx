@@ -21,21 +21,29 @@ export default function LangToggle({ variant = 'dark' }) {
 
   const current = LANGUAGES.find((l) => l.code === i18n.language) || LANGUAGES[0];
 
-  // Inline variant — renders a row of flag+code buttons, no dropdown wrapper needed
+  // Inline variant — scrollable list inside a dropdown, scales to any number of languages
   if (variant === 'inline') {
     return (
       <div>
-        <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1.5">Language</p>
-        <div className="flex gap-1 flex-wrap">
+        <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">Language</p>
+        <div className="max-h-40 overflow-y-auto -mx-1">
           {LANGUAGES.map(l => (
             <button
               key={l.code}
               onClick={() => i18n.changeLanguage(l.code)}
-              className={`flex-1 min-w-[52px] py-1.5 rounded-lg text-xs font-bold transition-all ${
-                i18n.language === l.code ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              className={`w-full flex items-center gap-2.5 px-2 py-2 rounded-xl text-sm transition-all ${
+                i18n.language === l.code
+                  ? 'bg-indigo-50 text-indigo-700 font-semibold'
+                  : 'text-gray-700 hover:bg-gray-50'
               }`}
             >
-              {l.flag} {l.code.toUpperCase()}
+              <span className="text-base leading-none">{l.flag}</span>
+              <span className="flex-1 text-left">{l.label}</span>
+              {i18n.language === l.code && (
+                <svg className="w-3.5 h-3.5 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+              )}
             </button>
           ))}
         </div>
