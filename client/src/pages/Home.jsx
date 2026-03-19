@@ -538,17 +538,17 @@ export default function Home() {
       </section>
 
       {/* ── Featured services ──────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="flex items-end justify-between mb-8">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 sm:pb-16">
+        <div className="flex items-end justify-between mb-5 sm:mb-8">
           <div>
             <p className="section-label">{t('featured.label')}</p>
-            <h2 className="text-3xl font-black text-gray-900">{t('featured.heading')}</h2>
+            <h2 className="text-2xl sm:text-3xl font-black text-gray-900">{t('featured.heading')}</h2>
           </div>
           <Link to="/explore" className="btn-secondary text-sm py-2">{t('featured.viewAll')}</Link>
         </div>
 
         {featured?.services?.length ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
             {featured.services.map((s) => <ServiceCard key={s.id} service={s} />)}
           </div>
         ) : (
