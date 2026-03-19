@@ -224,34 +224,21 @@ export default function Explore() {
           </form>
         </div>
 
-        {/* Category chips */}
-        <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+        {/* Filter pills */}
+        <div className="flex gap-2 mt-1 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
+
+          {/* Category dropdown */}
           <button
-            onClick={() => set('niche', '')}
-            className={`shrink-0 px-3.5 py-1.5 rounded-full text-sm font-semibold border transition-all ${
-              !niche ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-200'
+            onClick={() => setSheet(sheet === 'category' ? null : 'category')}
+            className={`shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${
+              niche ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-200'
             }`}
           >
-            All
+            {activeNiche ? `${activeNiche.icon} ${t('niches.' + activeNiche.slug.replace(/-/g,'_'), { defaultValue: activeNiche.name })}` : t('explore.category')}
+            <svg className="w-3 h-3 ml-0.5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+            </svg>
           </button>
-          {niches.map(n => (
-            <button
-              key={n.id}
-              onClick={() => set('niche', niche === n.slug ? '' : n.slug)}
-              className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold border transition-all whitespace-nowrap ${
-                niche === n.slug
-                  ? 'bg-indigo-600 text-white border-indigo-600'
-                  : 'bg-white text-gray-600 border-gray-200'
-              }`}
-            >
-              <span>{n.icon}</span>
-              <span>{t('niches.' + n.slug.replace(/-/g,'_'), { defaultValue: n.name })}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Filter pills */}
-        <div className="flex gap-2 mt-2 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
 
           {/* Sort */}
           <button
@@ -349,6 +336,45 @@ export default function Explore() {
           </div>
         )}
       </div>
+
+      {/* ── Category sheet ── */}
+      {sheet === 'category' && (
+        <Sheet title={t('explore.category')} onClose={() => setSheet(null)}>
+          <div className="space-y-1 max-h-[55vh] overflow-y-auto">
+            <button
+              onClick={() => { set('niche', ''); setSheet(null); }}
+              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all text-left ${
+                !niche ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              <span className="text-base">🔍</span>
+              All categories
+              {!niche && (
+                <svg className="w-4 h-4 ml-auto" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
+                </svg>
+              )}
+            </button>
+            {niches.map(n => (
+              <button
+                key={n.id}
+                onClick={() => { set('niche', n.slug); setSheet(null); }}
+                className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all text-left ${
+                  niche === n.slug ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <span className="text-base">{n.icon}</span>
+                {t('niches.' + n.slug.replace(/-/g,'_'), { defaultValue: n.name })}
+                {niche === n.slug && (
+                  <svg className="w-4 h-4 ml-auto" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
+                  </svg>
+                )}
+              </button>
+            ))}
+          </div>
+        </Sheet>
+      )}
 
       {/* ── Sort sheet ── */}
       {sheet === 'sort' && (
