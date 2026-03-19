@@ -24,6 +24,7 @@ export default function Chat() {
   const [typingUser, setTypingUser] = useState(null);
   const bottomRef = useRef(null);
   const typingTimeout = useRef(null);
+  const prevMessageCount = useRef(0);
 
   // Load conversations list
   const { data: conversations = [] } = useQuery({
@@ -67,9 +68,12 @@ export default function Chat() {
     };
   }, [socket, conversationId]);
 
-  // Scroll to bottom on new messages
+  // Scroll to bottom only when a NEW message arrives, not on initial load
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messages.length > prevMessageCount.current) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+    prevMessageCount.current = messages.length;
   }, [messages]);
 
   const sendMessage = () => {
