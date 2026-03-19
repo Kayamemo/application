@@ -58,7 +58,7 @@ export default function ServiceDetail() {
   const isOwner = service.sellerId === user?.id;
 
   return (
-    <div className={`bg-gray-50 ${!isOwner ? 'pb-24 lg:pb-0' : ''}`}>
+    <div className={!isOwner ? 'pb-24 lg:pb-0' : ''}>
 
       {/* ── Top bar ── */}
       <div className="bg-white border-b border-gray-100 sticky top-0 z-20">
@@ -73,6 +73,7 @@ export default function ServiceDetail() {
         </div>
       </div>
 
+      <div className="bg-gray-50">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
         <div className="lg:grid lg:grid-cols-3 lg:gap-8">
 
@@ -335,6 +336,7 @@ export default function ServiceDetail() {
           </div>
 
         </div>
+      </div>
       </div>
 
       {/* ── Mobile sticky bottom bar ── */}
