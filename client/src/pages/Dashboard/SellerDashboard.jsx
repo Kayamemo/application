@@ -72,12 +72,12 @@ export default function SellerDashboard() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div className="flex items-center gap-3">
           <BackButton />
-          <h1 className="text-2xl font-bold">{t('sellerDash.title')}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold">{t('sellerDash.title')}</h1>
         </div>
-        <Link to="/services/new" className="btn-primary text-sm">{t('sellerDash.newService')}</Link>
+        <Link to="/services/new" className="btn-primary text-sm w-full sm:w-auto text-center">{t('sellerDash.newService')}</Link>
       </div>
 
       {/* Tabs */}
@@ -144,30 +144,30 @@ export default function SellerDashboard() {
             </div>
           )}
           {services?.map((svc) => (
-            <div key={svc.id} className="card p-4 flex items-center gap-4">
-              <div className="w-14 h-10 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                {svc.images?.[0]
-                  ? <img src={svc.images[0]} alt="" className="w-full h-full object-cover" />
-                  : <div className="w-full h-full flex items-center justify-center">{svc.niche?.icon || '🛠️'}</div>
-                }
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
+            <div key={svc.id} className="card p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
+                  {svc.images?.[0]
+                    ? <img src={svc.images[0]} alt="" className="w-full h-full object-cover" />
+                    : <div className="w-full h-full flex items-center justify-center text-2xl">{svc.niche?.icon || '🛠️'}</div>
+                  }
+                </div>
+                <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-sm truncate">{svc.title}</h3>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {svc._count?.orders || 0} {t('sellerDash.services.orders')} · ${parseFloat(svc.basePrice).toFixed(2)}
+                  </p>
                   <Badge
                     label={svc.isActive ? t('sellerDash.services.active') : t('sellerDash.services.paused')}
                     variant={svc.isActive ? 'green' : 'gray'}
                   />
                 </div>
-                <p className="text-xs text-gray-400">
-                  {svc._count?.orders || 0} {t('sellerDash.services.orders')} · {t('sellerDash.services.from')} ${parseFloat(svc.basePrice).toFixed(2)}
-                </p>
               </div>
-              <div className="flex gap-2 flex-shrink-0">
-                <Link to={`/services/${svc.id}`} className="btn-secondary text-xs py-1">{t('sellerDash.services.view')}</Link>
+              <div className="flex gap-2 mt-3">
+                <Link to={`/services/${svc.id}`} className="btn-secondary text-xs py-1.5 flex-1 text-center">{t('sellerDash.services.view')}</Link>
                 <button
                   onClick={() => toggleServiceMutation.mutate({ id: svc.id, isActive: !svc.isActive })}
-                  className="btn-secondary text-xs py-1"
+                  className="btn-secondary text-xs py-1.5 flex-1"
                 >
                   {svc.isActive ? t('sellerDash.services.pause') : t('sellerDash.services.activate')}
                 </button>

@@ -409,7 +409,7 @@ export default function Home() {
                     </div>
                   )}
                 </div>
-                <button type="submit" className="btn-primary shrink-0 m-1.5 rounded-xl">
+                <button type="submit" className="btn-primary shrink-0 m-1.5 rounded-xl sm:rounded-xl w-[calc(100%-0.75rem)] sm:w-auto">
                   {t('hero.search')}
                 </button>
               </div>
@@ -436,7 +436,7 @@ export default function Home() {
           </div>
 
           {/* Trust stats */}
-          <div className="flex justify-center gap-8 mt-14">
+          <div className="flex justify-center gap-6 sm:gap-8 mt-10 sm:mt-14">
             {TRUST_STAT_KEYS.map((s) => (
               <div key={s.key} className="text-center">
                 <div className="text-2xl font-black text-white">{s.value}</div>
@@ -537,7 +537,7 @@ export default function Home() {
       {/* ── Seller CTA ─────────────────────────────────────── */}
       <section className="py-16 px-4">
         <div className="max-w-5xl mx-auto">
-          <div className="relative overflow-hidden rounded-3xl bg-indigo-950 text-white p-10 md:p-14 text-center">
+          <div className="relative overflow-hidden rounded-3xl bg-indigo-950 text-white p-6 sm:p-10 md:p-14 text-center">
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
               <div className="absolute -top-20 -right-20 w-64 h-64 bg-violet-500/30 rounded-full blur-3xl" />
               <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-primary-500/20 rounded-full blur-3xl" />

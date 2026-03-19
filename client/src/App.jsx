@@ -12,6 +12,7 @@ function ScrollToTop() {
 import { useAuth } from './contexts/AuthContext';
 import SlimHeader from './components/layout/SlimHeader';
 import Footer from './components/layout/Footer';
+import BottomNav from './components/layout/BottomNav';
 
 // Pages
 import Home from './pages/Home';
@@ -46,10 +47,11 @@ function ProtectedRoute({ allowedRoles }) {
 function MainLayout() {
   return (
     <div className="min-h-screen flex flex-col">
-      <main className="flex-1">
+      <main className="flex-1 pb-16 md:pb-0">
         <Outlet />
       </main>
       <Footer />
+      <BottomNav />
     </div>
   );
 }
@@ -58,10 +60,11 @@ function MainLayoutWithHeader() {
   return (
     <div className="min-h-screen flex flex-col">
       <SlimHeader />
-      <main className="flex-1">
+      <main className="flex-1 pb-16 md:pb-0">
         <Outlet />
       </main>
       <Footer />
+      <BottomNav />
     </div>
   );
 }
