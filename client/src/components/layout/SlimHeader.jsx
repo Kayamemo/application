@@ -112,7 +112,7 @@ export default function SlimHeader() {
         </nav>
 
         <div className="flex-1 flex items-center justify-end gap-2" ref={ref}>
-          <LangToggle variant="dark" />
+          <span className="hidden sm:block"><LangToggle variant="dark" /></span>
           {user ? (
             <>
               <div className="relative">
