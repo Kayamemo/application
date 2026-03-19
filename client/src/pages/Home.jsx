@@ -7,6 +7,7 @@ import { useGeoFilter } from '../hooks/useGeoFilter';
 import { useAuth } from '../contexts/AuthContext';
 import ServiceCard from '../components/ui/ServiceCard';
 import Avatar from '../components/ui/Avatar';
+import LangToggle from '../components/ui/LangToggle';
 import toast from 'react-hot-toast';
 
 const TRUST_STAT_KEYS = [
@@ -42,7 +43,7 @@ async function forwardGeocode(query) {
 export default function Home() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
@@ -278,15 +279,7 @@ export default function Home() {
                       </Link>
                     ))}
                     <div className="border-t border-gray-100 mt-1 pt-1 px-3 py-2">
-                      <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1.5">Language</p>
-                      <div className="flex gap-1">
-                        {[{ code: 'en', flag: '🇬🇧' }, { code: 'de', flag: '🇩🇪' }, { code: 'es', flag: '🇪🇸' }].map(l => (
-                          <button key={l.code} onClick={() => i18n.changeLanguage(l.code)}
-                            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${i18n.language === l.code ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
-                            {l.flag} {l.code.toUpperCase()}
-                          </button>
-                        ))}
-                      </div>
+                      <LangToggle variant="inline" />
                     </div>
                     <div className="border-t border-gray-100 pt-1">
                       <button onClick={async () => { await logout(); navigate('/'); }}
