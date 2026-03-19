@@ -179,59 +179,6 @@ export default function ServiceDetail() {
               </div>
             )}
 
-            {/* Packages — visible on mobile too (above description) */}
-            {service.packages?.length > 0 && (
-              <div className="bg-white rounded-2xl overflow-hidden border border-gray-100">
-                {/* Tab row */}
-                <div className="flex border-b border-gray-100">
-                  {service.packages.map((p, i) => (
-                    <button key={p.id} onClick={() => setSelectedPackage(i)}
-                      className={`flex-1 py-3 text-sm font-semibold transition-all relative ${
-                        selectedPackage === i ? 'text-indigo-600' : 'text-gray-400 hover:text-gray-600'
-                      }`}>
-                      {p.name}
-                      {p.isPopular && <span className="ml-1 text-yellow-400">★</span>}
-                      {selectedPackage === i && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-500" />}
-                    </button>
-                  ))}
-                </div>
-                {/* Package details */}
-                <div className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-2xl font-black text-gray-900">${price.toFixed(0)}</span>
-                    <div className="flex gap-3 text-xs text-gray-500">
-                      <span>🕐 {pkg.deliveryDays} {t('detail.daysPlural')}</span>
-                      <span>🔄 {pkg.revisions} {t('detail.revisionsPlural')}</span>
-                    </div>
-                  </div>
-                  {pkg.description && <p className="text-sm text-gray-500 mb-3">{pkg.description}</p>}
-                  {pkg.features?.length > 0 && (
-                    <ul className="space-y-1.5">
-                      {pkg.features.map((f, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                          <span className="text-green-500 font-bold shrink-0 mt-0.5">✓</span>
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* No packages: simple price block */}
-            {!service.packages?.length && (
-              <div className="bg-white rounded-2xl p-4 border border-gray-100 flex items-center justify-between">
-                <div>
-                  <p className="text-2xl font-black text-gray-900">${price.toFixed(0)}</p>
-                  <p className="text-sm text-gray-400">🕐 {service.deliveryDays} {t('detail.daysPlural')} delivery</p>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  {service.isRemote && <span className="bg-green-50 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">🌐 Remote</span>}
-                </div>
-              </div>
-            )}
-
             {/* Description */}
             <div className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-100">
               <h2 className="font-bold text-gray-900 mb-3">{t('detail.aboutService')}</h2>
