@@ -174,7 +174,7 @@ export default function Home() {
 
         {/* ── Top bar: logo + nav + auth ── */}
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 flex items-center">
-          <div className="flex-1">
+          <div className="md:flex-1">
           <Link to="/" className="flex items-center gap-2 w-fit">
             <div className="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
               <span className="text-white font-black text-sm">K</span>
@@ -247,8 +247,8 @@ export default function Home() {
             ))}
           </nav>
 
-          <div className="flex-1 flex items-center justify-end gap-2" ref={userMenuRef}>
-            <LangToggle variant="light" />
+          <div className="ml-auto md:flex-1 flex items-center justify-end gap-2" ref={userMenuRef}>
+            <span className="hidden sm:block"><LangToggle variant="light" /></span>
             {user ? (
               <>
               <div className="relative">
@@ -291,8 +291,11 @@ export default function Home() {
               </>
             ) : (
               <>
-                <Link to="/login"    className="text-sm text-white/70 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors">{t('nav.login')}</Link>
-                <Link to="/register" className="text-sm bg-white text-indigo-700 font-bold px-4 py-1.5 rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all">{t('nav.getStarted')}</Link>
+                <Link to="/login"    className="text-sm text-white/70 hover:text-white px-2.5 py-1.5 rounded-lg hover:bg-white/10 transition-colors">{t('nav.login')}</Link>
+                <Link to="/register" className="text-sm bg-white text-indigo-700 font-bold px-3 py-1.5 rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                  <span className="hidden sm:inline">{t('nav.getStarted')}</span>
+                  <span className="sm:hidden">Sign up</span>
+                </Link>
               </>
             )}
           </div>
