@@ -355,7 +355,7 @@ export default function Home() {
                           onChange={(e) => setLocInput(e.target.value)}
                           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleLocSubmit(e); } }}
                           placeholder={t('location.placeholder')}
-                          className="input text-sm flex-1 text-gray-900"
+                          className="input flex-1 text-gray-900"
                           autoFocus
                         />
                         <button

@@ -7,6 +7,10 @@
     background-color: #f8f8fc;
     @apply text-gray-900 font-sans antialiased;
   }
+  /* Prevent iOS Safari from auto-zooming when tapping any input */
+  @media (max-width: 639px) {
+    input, textarea, select { font-size: 16px !important; }
+  }
 }
 
 @layer components {
