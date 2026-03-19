@@ -58,7 +58,7 @@ export default function ServiceDetail() {
   const isOwner = service.sellerId === user?.id;
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-28 lg:pb-0">
+    <div className={`bg-gray-50 ${!isOwner ? 'pb-24 lg:pb-0' : ''}`}>
 
       {/* ── Top bar ── */}
       <div className="bg-white border-b border-gray-100 sticky top-0 z-20">
