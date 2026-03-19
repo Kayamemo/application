@@ -7,7 +7,7 @@ export default function Footer() {
   const { user } = useAuth();
 
   return (
-    <footer className="bg-gray-950 text-gray-400 mt-16">
+    <footer className="hidden md:block bg-gray-950 text-gray-400 mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
           <div className="col-span-2 md:col-span-1">
