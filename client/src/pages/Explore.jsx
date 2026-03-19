@@ -54,7 +54,7 @@ function Sheet({ title, onClose, children }) {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end">
+    <div className="fixed inset-0 z-[60] flex flex-col justify-end">
       <div className="absolute inset-0 bg-black/30" onClick={onClose} />
       <div className="relative bg-white rounded-t-3xl shadow-2xl animate-fade-up">
         {/* handle */}
@@ -69,7 +69,7 @@ function Sheet({ title, onClose, children }) {
             </svg>
           </button>
         </div>
-        <div className="px-5 py-4">{children}</div>
+        <div className="px-5 py-4 pb-8">{children}</div>
       </div>
     </div>
   );
