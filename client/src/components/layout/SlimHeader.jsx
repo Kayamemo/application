@@ -35,13 +35,15 @@ export default function SlimHeader() {
 
   return (
     <header className="glass border-b border-white/30 sticky top-0 z-50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 shrink-0">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center">
+        <div className="flex-1">
+        <Link to="/" className="flex items-center gap-2 w-fit">
           <div className="w-7 h-7 rounded-xl bg-indigo-600 flex items-center justify-center shadow-md">
             <span className="text-white font-black text-xs">K</span>
           </div>
           <span className="text-lg font-black tracking-tight gradient-text">Kaya</span>
         </Link>
+        </div>
 
         {/* Center nav — desktop only, mirrors mobile bottom nav */}
         <nav className="hidden md:flex items-center gap-1">
@@ -109,7 +111,7 @@ export default function SlimHeader() {
           })}
         </nav>
 
-        <div className="flex items-center gap-2" ref={ref}>
+        <div className="flex-1 flex items-center justify-end gap-2" ref={ref}>
           <LangToggle variant="dark" />
           {user ? (
             <>

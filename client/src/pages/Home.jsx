@@ -173,13 +173,15 @@ export default function Home() {
         </div>
 
         {/* ── Top bar: logo + nav + auth ── */}
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 shrink-0">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 flex items-center">
+          <div className="flex-1">
+          <Link to="/" className="flex items-center gap-2 w-fit">
             <div className="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
               <span className="text-white font-black text-sm">K</span>
             </div>
             <span className="text-xl font-black tracking-tight text-white">Kaya</span>
           </Link>
+          </div>
 
           {/* Center nav — desktop only, mirrors mobile bottom nav */}
           <nav className="hidden md:flex items-center gap-1">
@@ -245,7 +247,7 @@ export default function Home() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-2" ref={userMenuRef}>
+          <div className="flex-1 flex items-center justify-end gap-2" ref={userMenuRef}>
             <LangToggle variant="light" />
             {user ? (
               <>
