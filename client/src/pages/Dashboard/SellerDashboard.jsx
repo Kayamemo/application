@@ -181,39 +181,59 @@ export default function SellerDashboard() {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="card divide-y divide-gray-50">
               {services.map((svc) => (
-                <div key={svc.id} className="card overflow-hidden flex flex-col">
+                <div key={svc.id} className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors">
                   {/* Thumbnail */}
-                  <div className="aspect-video bg-gray-100 flex items-center justify-center overflow-hidden">
+                  <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden shrink-0">
                     {svc.images?.[0]
                       ? <img src={svc.images[0]} alt="" className="w-full h-full object-cover" />
-                      : <span className="text-4xl">{svc.niche?.icon || '🛠️'}</span>
+                      : <span className="text-xl">{svc.niche?.icon || '🛠️'}</span>
                     }
                   </div>
-                  {/* Body */}
-                  <div className="p-4 flex flex-col flex-1">
-                    <h3 className="font-bold text-gray-900 leading-snug mb-1">{svc.title}</h3>
-                    <p className="text-sm text-gray-400 mb-2">
-                      {svc._count?.orders || 0} {t('sellerDash.services.orders')} · <span className="font-semibold text-gray-700">${parseFloat(svc.basePrice).toFixed(2)}</span>
-                    </p>
-                    <div className="mb-3">
-                      <Badge
-                        label={svc.isActive ? t('sellerDash.services.active') : t('sellerDash.services.paused')}
-                        variant={svc.isActive ? 'green' : 'gray'}
-                      />
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm text-gray-900 truncate">{svc.title}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${svc.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                        {svc.isActive ? t('sellerDash.services.active') : t('sellerDash.services.paused')}
+                      </span>
+                      <span className="text-xs text-gray-400">{svc._count?.orders || 0} orders</span>
+                      <span className="text-xs font-bold text-gray-700">${parseFloat(svc.basePrice).toFixed(0)}</span>
                     </div>
-                    <div className="flex gap-2 mt-auto">
-                      <Link to={`/services/${svc.id}`} className="btn-secondary text-xs py-1.5 flex-1 text-center">
-                        {t('sellerDash.services.view')}
-                      </Link>
-                      <button
-                        onClick={() => toggleServiceMutation.mutate({ id: svc.id, isActive: !svc.isActive })}
-                        className="btn-secondary text-xs py-1.5 flex-1"
-                      >
-                        {svc.isActive ? t('sellerDash.services.pause') : t('sellerDash.services.activate')}
-                      </button>
-                    </div>
+                  </div>
+                  {/* Actions */}
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Link to={`/services/${svc.id}`}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+                      title={t('sellerDash.services.view')}>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </Link>
+                    <Link to={`/services/${svc.id}/edit`}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+                      title="Edit">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </Link>
+                    <button
+                      onClick={() => toggleServiceMutation.mutate({ id: svc.id, isActive: !svc.isActive })}
+                      className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${svc.isActive ? 'hover:bg-orange-50 text-orange-400' : 'hover:bg-green-50 text-green-500'}`}
+                      title={svc.isActive ? t('sellerDash.services.pause') : t('sellerDash.services.activate')}>
+                      {svc.isActive ? (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      )}
+                    </button>
                   </div>
                 </div>
               ))}
