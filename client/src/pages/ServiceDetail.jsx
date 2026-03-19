@@ -131,6 +131,54 @@ export default function ServiceDetail() {
               </Link>
             </div>
 
+            {/* ── Mobile order card (hidden on desktop, desktop uses right column) ── */}
+            {!isOwner && (
+              <div className="lg:hidden bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                {service.packages?.length > 0 && (
+                  <div className="flex border-b border-gray-100">
+                    {service.packages.map((p, i) => (
+                      <button key={p.id} onClick={() => setSelectedPackage(i)}
+                        className={`flex-1 py-3 text-sm font-semibold transition-all relative ${selectedPackage === i ? 'text-indigo-600' : 'text-gray-400'}`}>
+                        {p.name}
+                        {p.isPopular && <span className="ml-1 text-yellow-400">★</span>}
+                        {selectedPackage === i && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-500" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-2xl font-black text-gray-900">${price.toFixed(0)}</span>
+                    {pkg ? (
+                      <div className="text-xs text-gray-400 text-right">
+                        <p>🕐 {pkg.deliveryDays} {t('detail.daysPlural')}</p>
+                        <p>🔄 {pkg.revisions} {t('detail.revisionsPlural')}</p>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-400">🕐 {service.deliveryDays} {t('detail.daysPlural')}</p>
+                    )}
+                  </div>
+                  {pkg?.description && <p className="text-sm text-gray-500 mb-3">{pkg.description}</p>}
+                  {pkg?.features?.length > 0 && (
+                    <ul className="space-y-1.5 mb-4">
+                      {pkg.features.map((f, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                          <span className="text-green-500 font-bold shrink-0 mt-0.5">✓</span>{f}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <button onClick={handleOrder} className="btn-primary w-full py-3 font-bold mb-2">
+                    {t('detail.continue')} — ${price.toFixed(0)}
+                  </button>
+                  <button onClick={handleContact}
+                    className="w-full border border-gray-200 text-gray-700 font-semibold py-2.5 rounded-xl hover:border-indigo-300 hover:text-indigo-600 transition-all text-sm">
+                    {t('detail.contactSeller')}
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Packages — visible on mobile too (above description) */}
             {service.packages?.length > 0 && (
               <div className="bg-white rounded-2xl overflow-hidden border border-gray-100">
