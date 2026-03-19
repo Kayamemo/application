@@ -41,7 +41,11 @@ export default function Chat() {
   });
 
   useEffect(() => {
-    if (convData?.messages) setMessages(convData.messages);
+    if (convData?.messages) {
+      isInitialLoad.current = true;
+      prevMessageCount.current = 0;
+      setMessages(convData.messages);
+    }
   }, [convData]);
 
   // Socket.io events
@@ -68,8 +72,13 @@ export default function Chat() {
     };
   }, [socket, conversationId]);
 
-  // Scroll to bottom only when a NEW message arrives, not on initial load
+  // Scroll to bottom only when a NEW message is sent/received, not on initial load
+  const isInitialLoad = useRef(true);
   useEffect(() => {
+    if (isInitialLoad.current) {
+      isInitialLoad.current = false;
+      return;
+    }
     if (messages.length > prevMessageCount.current) {
       bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
