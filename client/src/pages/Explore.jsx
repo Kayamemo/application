@@ -1,7 +1,7 @@
 // ============================================================
-// Explore Page — clean mobile bottom sheet + desktop sidebar
+// Explore Page — Fiverr-style: chips row + filter pill dropdowns
 // ============================================================
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -41,12 +41,46 @@ async function forwardGeocode(query) {
   return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon), label: data[0].display_name.split(',')[0] };
 }
 
+// Pill button — shown in the filter row
+function FilterPill({ label, active, onClick, children }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`relative shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-full border text-sm font-semibold transition-all whitespace-nowrap ${
+        active
+          ? 'bg-gray-900 text-white border-gray-900'
+          : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
+      }`}
+    >
+      {label}
+      <svg className={`w-3.5 h-3.5 transition-transform ${active ? 'text-white' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+      </svg>
+    </button>
+  );
+}
+
+// Small dropdown card that appears below a pill
+function Dropdown({ children, onClose }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) onClose(); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [onClose]);
+  return (
+    <div ref={ref} className="absolute left-0 top-full mt-2 z-40 bg-white rounded-2xl border border-gray-200 shadow-xl p-4 min-w-[220px] animate-fade-up">
+      {children}
+    </div>
+  );
+}
+
 export default function Explore() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [geoLoading, setGeoLoading] = useState(false);
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(null); // 'sort' | 'price' | 'location' | null
 
   const { coords, locationLabel, radius, setLocation, setRadius, clearLocation } = useGeoFilter();
   const [locationInput, setLocationInput] = useState(locationLabel);
@@ -62,12 +96,6 @@ export default function Explore() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Lock body scroll when sheet is open
-  useEffect(() => {
-    document.body.style.overflow = sheetOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [sheetOpen]);
 
   const q        = searchParams.get('q')        || '';
   const niche    = searchParams.get('niche')    || '';
@@ -105,13 +133,6 @@ export default function Explore() {
     setSearchParams(p);
   };
 
-  const clearAllFilters = () => {
-    const p = new URLSearchParams(searchParams);
-    ['niche','sort','minPrice','maxPrice','remote'].forEach(k => p.delete(k));
-    setSearchParams(p);
-    clearLocation();
-  };
-
   const useMyLocation = useCallback(() => {
     if (!navigator.geolocation) { toast.error('Geolocation not supported'); return; }
     setGeoLoading(true);
@@ -121,7 +142,8 @@ export default function Explore() {
         setLocation({ lat: c.latitude, lng: c.longitude, label, radius });
         setLocationInput(label);
         setGeoLoading(false);
-        toast.success(`Location: ${label}`);
+        setOpenDropdown(null);
+        toast.success(`📍 ${label}`);
       },
       () => { toast.error('Could not get location. Try typing a city.'); setGeoLoading(false); },
       { timeout: 8000 }
@@ -130,12 +152,14 @@ export default function Explore() {
 
   const handleLocationSearch = async (e) => {
     e?.preventDefault();
-    if (!locationInput.trim()) { clearLocation(); return; }
+    if (!locationInput.trim()) { clearLocation(); setOpenDropdown(null); return; }
     setGeoLoading(true);
     try {
       const result = await forwardGeocode(locationInput.trim());
       setLocation({ lat: result.lat, lng: result.lng, label: result.label, radius });
       setLocationInput(result.label);
+      setOpenDropdown(null);
+      toast.success(`📍 ${result.label}`);
     } catch { toast.error('Location not found.'); }
     finally { setGeoLoading(false); }
   };
@@ -151,8 +175,12 @@ export default function Explore() {
   useEffect(() => { setSearchInput(q); }, [q]);
   const handleSearch = (e) => { e.preventDefault(); updateParam('q', searchInput.trim()); };
 
-  const activePreset = PRICE_PRESETS.find(pr => pr.min === minPrice && pr.max === maxPrice);
-  const activeFilterCount = [niche, minPrice || maxPrice, coords, remote === 'true'].filter(Boolean).length;
+  const activePrice  = PRICE_PRESETS.find(pr => pr.min === minPrice && pr.max === maxPrice);
+  const activeSort   = SORT_OPTIONS.find(o => o.value === sort);
+  const priceActive  = !!(minPrice || maxPrice);
+  const locationActive = !!coords;
+
+  const toggle = (name) => setOpenDropdown(prev => prev === name ? null : name);
 
   const resultTitle = q
     ? t('explore.resultsFor', { q })
@@ -160,30 +188,19 @@ export default function Explore() {
       ? (() => { const f = niches.find(n => n.slug === niche); return f ? `${t('niches.' + f.slug.replace(/-/g,'_'), { defaultValue: f.name })} ${t('explore.services')}` : t('explore.allServices'); })()
       : t('explore.allServices');
 
-  // Shared price pills used in both sheet and sidebar
-  const PricePills = () => (
-    <div className="flex flex-wrap gap-2">
-      {PRICE_PRESETS.map((pr) => {
-        const on = pr.min === minPrice && pr.max === maxPrice;
-        return (
-          <button key={pr.label} onClick={() => setPresetPrice(pr)}
-            className={`text-sm px-3 py-1.5 rounded-full border font-medium transition-all ${on ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-600 border-gray-200 hover:border-primary-300'}`}>
-            {pr.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
 
-      {/* Search bar */}
+      {/* ── Search bar ── */}
       <div className="flex items-center gap-2 mb-4">
         <BackButton />
         <form onSubmit={handleSearch} className="flex gap-2 flex-1">
-          <input value={searchInput} onChange={e => setSearchInput(e.target.value)}
-            placeholder={t('hero.searchPlaceholder')} className="input flex-1" />
+          <input
+            value={searchInput}
+            onChange={e => setSearchInput(e.target.value)}
+            placeholder={t('hero.searchPlaceholder')}
+            className="input flex-1"
+          />
           <button type="submit" className="btn-primary px-4 shrink-0">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -192,264 +209,221 @@ export default function Explore() {
         </form>
       </div>
 
-      {/* Mobile: category chips + filter button */}
-      <div className="md:hidden mb-4">
-        <div className="flex items-center gap-2">
-          {/* Category chips — scrollable */}
-          <div className="flex gap-2 overflow-x-auto flex-1 pb-1 -mr-4 pr-4" style={{ scrollbarWidth: 'none' }}>
-            <button onClick={() => updateParam('niche', '')}
-              className={`shrink-0 text-xs px-3 py-2 rounded-full border font-semibold transition-all ${!niche ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-600 border-gray-200'}`}>
-              {t('explore.all')}
-            </button>
-            {niches.map(n => (
-              <button key={n.id} onClick={() => updateParam('niche', niche === n.slug ? '' : n.slug)}
-                className={`shrink-0 text-xs px-3 py-2 rounded-full border font-semibold transition-all whitespace-nowrap ${niche === n.slug ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-600 border-gray-200'}`}>
-                {n.icon} {t('niches.' + n.slug.replace(/-/g,'_'), { defaultValue: n.name })}
-              </button>
-            ))}
-          </div>
-          {/* Filter button */}
-          <button onClick={() => setSheetOpen(true)}
-            className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full border text-xs font-semibold transition-all ${activeFilterCount > 0 ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300'}`}>
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h18M7 8h10M11 12h4" />
-            </svg>
-            {t('explore.filters')}
-            {activeFilterCount > 0 && <span className="bg-white text-primary-600 rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-black">{activeFilterCount}</span>}
+      {/* ── Category chips ── */}
+      <div className="flex gap-2 overflow-x-auto pb-1 mb-3" style={{ scrollbarWidth: 'none' }}>
+        <button
+          onClick={() => updateParam('niche', '')}
+          className={`shrink-0 px-4 py-2 rounded-full border text-sm font-semibold transition-all ${
+            !niche ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
+          }`}
+        >
+          {t('explore.all')}
+        </button>
+        {niches.map(n => (
+          <button
+            key={n.id}
+            onClick={() => updateParam('niche', niche === n.slug ? '' : n.slug)}
+            className={`shrink-0 px-4 py-2 rounded-full border text-sm font-semibold transition-all whitespace-nowrap ${
+              niche === n.slug ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
+            }`}
+          >
+            {n.icon} {t('niches.' + n.slug.replace(/-/g,'_'), { defaultValue: n.name })}
           </button>
-        </div>
+        ))}
       </div>
 
-      {/* ── Mobile bottom sheet ── */}
-      {sheetOpen && (
-        <div className="md:hidden fixed inset-0 z-50 flex flex-col justify-end">
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/40" onClick={() => setSheetOpen(false)} />
-          {/* Sheet */}
-          <div className="relative bg-white rounded-t-3xl shadow-2xl max-h-[85vh] flex flex-col">
-            {/* Handle */}
-            <div className="flex justify-center pt-3 pb-1">
-              <div className="w-10 h-1 bg-gray-200 rounded-full" />
-            </div>
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
-              <h3 className="font-bold text-gray-900">{t('explore.filters')}</h3>
-              <button onClick={clearAllFilters} className="text-sm text-primary-600 font-semibold">
-                {t('explore.clearAll') || 'Clear all'}
-              </button>
-            </div>
-            {/* Scrollable content */}
-            <div className="overflow-y-auto flex-1 px-5 py-4 space-y-6">
+      {/* ── Filter pill row ── */}
+      <div className="flex gap-2 overflow-x-auto pb-2 mb-5" style={{ scrollbarWidth: 'none' }}>
 
-              {/* Sort */}
-              <div>
-                <p className="text-sm font-semibold text-gray-900 mb-3">{t('explore.sort.label') || 'Sort by'}</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {SORT_OPTIONS.map(o => (
-                    <button key={o.value} onClick={() => updateParam('sort', o.value)}
-                      className={`text-sm py-2.5 px-3 rounded-xl border font-medium text-left transition-all ${sort === o.value ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-600 border-gray-200'}`}>
-                      {o.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Price */}
-              <div>
-                <p className="text-sm font-semibold text-gray-900 mb-3">{t('explore.priceRange')}</p>
-                <div className="grid grid-cols-3 gap-2">
-                  {PRICE_PRESETS.map(pr => {
-                    const on = pr.min === minPrice && pr.max === maxPrice;
-                    return (
-                      <button key={pr.label} onClick={() => setPresetPrice(pr)}
-                        className={`text-sm py-2.5 rounded-xl border font-medium transition-all ${on ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-600 border-gray-200'}`}>
-                        {pr.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Location */}
-              <div>
-                <p className="text-sm font-semibold text-gray-900 mb-3">{t('explore.location')}</p>
-                <form onSubmit={handleLocationSearch} className="flex gap-2 mb-2">
-                  <input value={locationInput} onChange={e => setLocationInput(e.target.value)}
-                    placeholder={t('explore.cityPlaceholder')} className="input flex-1 text-sm" />
-                  <button type="submit" disabled={geoLoading} className="btn-primary px-3 text-sm shrink-0">
-                    {geoLoading ? <span className="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : '→'}
-                  </button>
-                </form>
-                <button onClick={useMyLocation} disabled={geoLoading}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-indigo-200 text-indigo-600 text-sm font-medium hover:bg-indigo-50 transition-colors">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  {t('explore.useMyLocation')}
-                </button>
-                {coords && (
-                  <div className="mt-2 flex items-center justify-between bg-indigo-50 rounded-xl px-3 py-2">
-                    <span className="text-sm font-medium text-indigo-700 truncate">📍 {locationLabel}</span>
-                    <button onClick={clearLocation} className="text-indigo-400 hover:text-indigo-600 ml-2 font-bold">✕</button>
-                  </div>
-                )}
-                {coords && (
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {RADIUS_OPTIONS.map(r => (
-                      <button key={r.value} onClick={() => setRadius(r.value)}
-                        className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${radius === r.value ? 'border-indigo-500 bg-indigo-50 text-indigo-700 font-semibold' : 'border-gray-200 text-gray-500'}`}>
-                        {r.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Remote */}
-              <div className="flex items-center justify-between py-1">
-                <div>
-                  <p className="text-sm font-semibold text-gray-900">{t('explore.remoteOnly')}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">Online / remote services</p>
-                </div>
-                <button onClick={() => updateParam('remote', remote === 'true' ? '' : 'true')}
-                  className={`w-12 h-6 rounded-full transition-all relative ${remote === 'true' ? 'bg-primary-600' : 'bg-gray-200'}`}>
-                  <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${remote === 'true' ? 'left-6' : 'left-0.5'}`} />
-                </button>
-              </div>
-            </div>
-
-            {/* Done button */}
-            <div className="px-5 pb-6 pt-3 border-t border-gray-100">
-              <button onClick={() => setSheetOpen(false)} className="btn-primary w-full py-3 text-base">
-                {t('explore.showResults') || `Show ${data?.pagination?.total || ''} results`}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="flex flex-col md:flex-row gap-6">
-
-        {/* Desktop sidebar */}
-        <aside className="hidden md:block w-56 flex-shrink-0">
-          <div className="card p-4 space-y-5 sticky top-20">
-            {/* Category */}
-            <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t('explore.category')}</p>
-              <div className="space-y-0.5">
-                <button onClick={() => updateParam('niche', '')}
-                  className={`w-full text-left text-sm px-2 py-1.5 rounded-lg transition-colors ${!niche ? 'bg-primary-50 text-primary-700 font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}>
-                  {t('explore.all')}
-                </button>
-                {niches.map(n => (
-                  <button key={n.id} onClick={() => updateParam('niche', n.slug)}
-                    className={`w-full text-left text-sm px-2 py-1.5 rounded-lg transition-colors ${niche === n.slug ? 'bg-primary-50 text-primary-700 font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}>
-                    {n.icon} {t('niches.' + n.slug.replace(/-/g,'_'), { defaultValue: n.name })}
+        {/* Sort */}
+        <div className="relative shrink-0">
+          <FilterPill
+            label={activeSort?.label || t('explore.sort.label')}
+            active={openDropdown === 'sort'}
+            onClick={() => toggle('sort')}
+          />
+          {openDropdown === 'sort' && (
+            <Dropdown onClose={() => setOpenDropdown(null)}>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">{t('explore.sort.label') || 'Sort by'}</p>
+              <div className="space-y-1">
+                {SORT_OPTIONS.map(o => (
+                  <button
+                    key={o.value}
+                    onClick={() => { updateParam('sort', o.value); setOpenDropdown(null); }}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                      sort === o.value ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    {o.label}
                   </button>
                 ))}
               </div>
-            </div>
+            </Dropdown>
+          )}
+        </div>
 
-            {/* Location */}
-            <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t('explore.location')}</p>
-              <form onSubmit={handleLocationSearch} className="flex gap-1 mb-2">
-                <input value={locationInput} onChange={e => setLocationInput(e.target.value)}
-                  placeholder={t('explore.cityPlaceholder')} className="input text-sm flex-1 min-w-0" />
-                <button type="submit" disabled={geoLoading} className="btn-secondary text-xs px-2 shrink-0">
-                  {geoLoading ? <span className="inline-block w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" /> : '→'}
+        {/* Budget */}
+        <div className="relative shrink-0">
+          <FilterPill
+            label={priceActive ? (activePrice?.label || 'Budget') : 'Budget'}
+            active={priceActive || openDropdown === 'price'}
+            onClick={() => toggle('price')}
+          />
+          {openDropdown === 'price' && (
+            <Dropdown onClose={() => setOpenDropdown(null)}>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Budget</p>
+              <div className="space-y-1">
+                {PRICE_PRESETS.map(pr => {
+                  const on = pr.min === minPrice && pr.max === maxPrice;
+                  return (
+                    <button
+                      key={pr.label}
+                      onClick={() => { setPresetPrice(pr); setOpenDropdown(null); }}
+                      className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                        on ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      {pr.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </Dropdown>
+          )}
+        </div>
+
+        {/* Location */}
+        <div className="relative shrink-0">
+          <FilterPill
+            label={locationActive ? `📍 ${locationLabel}` : '📍 Location'}
+            active={locationActive || openDropdown === 'location'}
+            onClick={() => toggle('location')}
+          />
+          {openDropdown === 'location' && (
+            <Dropdown onClose={() => setOpenDropdown(null)}>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Location</p>
+              <form onSubmit={handleLocationSearch} className="flex gap-2 mb-3">
+                <input
+                  value={locationInput}
+                  onChange={e => setLocationInput(e.target.value)}
+                  placeholder={t('explore.cityPlaceholder')}
+                  className="input flex-1 text-sm"
+                  autoFocus
+                />
+                <button type="submit" disabled={geoLoading} className="btn-primary px-3 text-sm shrink-0">
+                  {geoLoading
+                    ? <span className="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    : '→'}
                 </button>
               </form>
-              <button onClick={useMyLocation} disabled={geoLoading}
-                className="w-full flex items-center justify-center gap-1.5 text-xs py-1.5 px-2 rounded-lg border border-indigo-200 text-indigo-600 hover:bg-indigo-50 transition-colors">
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <button
+                onClick={useMyLocation}
+                disabled={geoLoading}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
                 {t('explore.useMyLocation')}
               </button>
               {coords && (
-                <div className="mt-2 flex items-center justify-between bg-indigo-50 rounded-lg px-2.5 py-1.5">
-                  <span className="text-xs font-medium text-indigo-700 truncate">{locationLabel}</span>
-                  <button onClick={clearLocation} className="text-indigo-400 hover:text-indigo-600 ml-1">✕</button>
-                </div>
-              )}
-              {coords && (
-                <div className="mt-2 flex flex-wrap gap-1">
-                  {RADIUS_OPTIONS.map(r => (
-                    <button key={r.value} onClick={() => setRadius(r.value)}
-                      className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${radius === r.value ? 'border-indigo-500 bg-indigo-50 text-indigo-700 font-semibold' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>
-                      {r.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Price */}
-            <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t('explore.priceRange')}</p>
-              <PricePills />
-            </div>
-
-            {/* Remote */}
-            <div className="flex items-center gap-2">
-              <input type="checkbox" id="remote" checked={remote === 'true'} onChange={e => updateParam('remote', e.target.checked ? 'true' : '')} className="rounded border-gray-300" />
-              <label htmlFor="remote" className="text-sm text-gray-700">{t('explore.remoteOnly')}</label>
-            </div>
-          </div>
-        </aside>
-
-        {/* Results */}
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-            <div>
-              <h1 className="font-bold text-gray-900 text-sm sm:text-base">
-                {resultTitle}
-                {coords && <span className="ml-2 text-sm font-normal text-indigo-600">{t('explore.nearLabel', { location: locationLabel })}</span>}
-              </h1>
-              <p className="text-xs text-gray-400">{t('explore.servicesFound', { count: data?.pagination?.total || 0 })}</p>
-            </div>
-            <select value={sort} onChange={e => updateParam('sort', e.target.value)} className="hidden md:block input w-auto text-sm">
-              {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
-          </div>
-
-          {isLoading ? (
-            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="card animate-pulse">
-                  <div className="aspect-[4/3] sm:aspect-video bg-gray-200 rounded-t-xl" />
-                  <div className="p-2.5 sm:p-4 space-y-2">
-                    <div className="h-2.5 bg-gray-200 rounded w-3/4" />
-                    <div className="h-2.5 bg-gray-200 rounded w-1/2" />
+                <>
+                  <div className="mt-3 flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2">
+                    <span className="text-sm font-medium text-gray-700 truncate">📍 {locationLabel}</span>
+                    <button onClick={() => { clearLocation(); }} className="text-gray-400 hover:text-gray-600 ml-2 font-bold text-xs">✕ Clear</button>
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : data?.services?.length ? (
-            <>
-              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-                {data.services.map(s => <ServiceCard key={s.id} service={s} />)}
-              </div>
-              {data.pagination.pages > 1 && (
-                <div className="flex justify-center gap-2 mt-8">
-                  <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="btn-secondary px-3 py-1.5 text-sm disabled:opacity-40">{t('explore.prev')}</button>
-                  <span className="flex items-center text-sm text-gray-600">{t('explore.page')} {page} {t('explore.of')} {data.pagination.pages}</span>
-                  <button onClick={() => setPage(p => Math.min(data.pagination.pages, p + 1))} disabled={page >= data.pagination.pages} className="btn-secondary px-3 py-1.5 text-sm disabled:opacity-40">{t('explore.next')}</button>
-                </div>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {RADIUS_OPTIONS.map(r => (
+                      <button
+                        key={r.value}
+                        onClick={() => setRadius(r.value)}
+                        className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                          radius === r.value ? 'border-gray-900 bg-gray-900 text-white font-semibold' : 'border-gray-200 text-gray-500 hover:border-gray-400'
+                        }`}
+                      >
+                        {r.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
               )}
-            </>
-          ) : (
-            <div className="text-center py-20 text-gray-400">
-              <div className="text-5xl mb-4">🔍</div>
-              <p className="font-medium">{t('explore.noServices')}</p>
-              <p className="text-sm mt-1">{coords ? t('explore.noServicesGeo', { radius, location: locationLabel }) : t('explore.noServicesTip')}</p>
-            </div>
+            </Dropdown>
           )}
         </div>
+
+        {/* Remote toggle pill */}
+        <button
+          onClick={() => updateParam('remote', remote === 'true' ? '' : 'true')}
+          className={`shrink-0 px-4 py-2 rounded-full border text-sm font-semibold transition-all ${
+            remote === 'true' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
+          }`}
+        >
+          🌐 {t('explore.remoteOnly')}
+        </button>
+
       </div>
+
+      {/* ── Results header ── */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h1 className="font-bold text-gray-900 text-sm sm:text-base">
+            {resultTitle}
+            {coords && (
+              <span className="ml-2 text-sm font-normal text-gray-500">
+                {t('explore.nearLabel', { location: locationLabel })}
+              </span>
+            )}
+          </h1>
+          <p className="text-xs text-gray-400 mt-0.5">
+            {t('explore.servicesFound', { count: data?.pagination?.total || 0 })}
+          </p>
+        </div>
+      </div>
+
+      {/* ── Results grid ── */}
+      {isLoading ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="card animate-pulse">
+              <div className="aspect-[4/3] sm:aspect-video bg-gray-200 rounded-t-xl" />
+              <div className="p-2.5 sm:p-4 space-y-2">
+                <div className="h-2.5 bg-gray-200 rounded w-3/4" />
+                <div className="h-2.5 bg-gray-200 rounded w-1/2" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : data?.services?.length ? (
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            {data.services.map(s => <ServiceCard key={s.id} service={s} />)}
+          </div>
+          {data.pagination.pages > 1 && (
+            <div className="flex justify-center gap-2 mt-8">
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+                className="btn-secondary px-3 py-1.5 text-sm disabled:opacity-40">
+                {t('explore.prev')}
+              </button>
+              <span className="flex items-center text-sm text-gray-600">
+                {t('explore.page')} {page} {t('explore.of')} {data.pagination.pages}
+              </span>
+              <button onClick={() => setPage(p => Math.min(data.pagination.pages, p + 1))} disabled={page >= data.pagination.pages}
+                className="btn-secondary px-3 py-1.5 text-sm disabled:opacity-40">
+                {t('explore.next')}
+              </button>
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="text-center py-20 text-gray-400">
+          <div className="text-5xl mb-4">🔍</div>
+          <p className="font-medium">{t('explore.noServices')}</p>
+          <p className="text-sm mt-1">
+            {coords ? t('explore.noServicesGeo', { radius, location: locationLabel }) : t('explore.noServicesTip')}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
