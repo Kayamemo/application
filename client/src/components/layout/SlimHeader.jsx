@@ -1,6 +1,6 @@
-// Minimal sticky header for non-home pages — logo + user menu only
+// Minimal sticky header for non-home pages — logo + nav + user menu
 import { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../contexts/AuthContext';
@@ -12,8 +12,12 @@ export default function SlimHeader() {
   const { user, logout } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
+
+  const isSeller = user?.role === 'SELLER' || user?.role === 'ADMIN';
+  const isActive = (path) => path === '/' ? pathname === '/' : pathname.startsWith(path);
 
   const { data: conversations = [] } = useQuery({
     queryKey: ['conversations'],
@@ -32,12 +36,33 @@ export default function SlimHeader() {
   return (
     <header className="glass border-b border-white/30 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2 shrink-0">
           <div className="w-7 h-7 rounded-xl bg-indigo-600 flex items-center justify-center shadow-md">
             <span className="text-white font-black text-xs">K</span>
           </div>
           <span className="text-lg font-black tracking-tight gradient-text">Kaya</span>
         </Link>
+
+        {/* Center nav — desktop only */}
+        <nav className="hidden md:flex items-center gap-1">
+          {[
+            { to: '/',        label: t('nav.home') || 'Home' },
+            { to: '/explore', label: t('nav.browse') || 'Explore' },
+            ...(user ? [{ to: isSeller ? '/dashboard/seller' : '/dashboard', label: isSeller ? t('nav.navDashboard') || 'Dashboard' : t('nav.myOrders') || 'Orders' }] : []),
+          ].map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              className={`px-3.5 py-1.5 rounded-xl text-sm font-semibold transition-all ${
+                isActive(item.to)
+                  ? 'bg-primary-50 text-primary-600'
+                  : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
+              }`}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
 
         <div className="flex items-center gap-2" ref={ref}>
           <LangToggle variant="dark" />
