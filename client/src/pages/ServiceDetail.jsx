@@ -344,20 +344,23 @@ export default function ServiceDetail() {
 
       {/* ── Mobile sticky bottom bar ── */}
       {!isOwner && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-200 px-4 py-3 flex gap-3 items-center">
-          <div className="shrink-0">
-            <p className="text-xl font-black text-gray-900">${price.toFixed(0)}</p>
-            {pkg && <p className="text-xs text-gray-400">{pkg.deliveryDays} {t('detail.daysPlural')}</p>}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-100 shadow-lg px-4 py-3">
+          <div className="flex gap-2 items-center">
+            <div className="shrink-0 mr-1">
+              <p className="text-lg font-black text-gray-900">${price.toFixed(0)}</p>
+              {pkg && <p className="text-[10px] text-gray-400 leading-none">{pkg.deliveryDays}d delivery</p>}
+            </div>
+            <button onClick={handleOrder} className="btn-primary flex-1 py-2.5 font-bold text-sm">
+              {t('detail.continue')}
+            </button>
+            <button onClick={handleContact}
+              className="shrink-0 flex items-center gap-1.5 px-3 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+              </svg>
+              {t('detail.contactSeller')}
+            </button>
           </div>
-          <button onClick={handleOrder} className="btn-primary flex-1 py-3 font-bold">
-            {t('detail.continue')}
-          </button>
-          <button onClick={handleContact}
-            className="shrink-0 w-12 h-12 flex items-center justify-center border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-            </svg>
-          </button>
         </div>
       )}
 
