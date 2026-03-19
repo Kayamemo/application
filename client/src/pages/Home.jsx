@@ -511,27 +511,27 @@ export default function Home() {
       </section>
 
       {/* ── Browse by category ─────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center mb-10">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
+        <div className="text-center mb-6 sm:mb-10">
           <p className="section-label">{t('categories.label')}</p>
-          <h2 className="text-3xl font-black text-gray-900">{t('categories.heading')}</h2>
+          <h2 className="text-2xl sm:text-3xl font-black text-gray-900">{t('categories.heading')}</h2>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 sm:gap-3">
           {niches.map((niche) => (
             <Link
               key={niche.id}
               to={`/explore?niche=${niche.slug}`}
-              className="group relative bg-white rounded-2xl p-5 flex flex-col items-center text-center
+              className="group bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 flex flex-col items-center text-center
                          border border-gray-100 shadow-sm
                          hover:shadow-xl hover:-translate-y-1 hover:border-primary-200
                          transition-all duration-300"
             >
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-50 to-violet-50 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
-                <span className="text-3xl">{niche.icon || '🛠️'}</span>
+              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary-50 to-violet-50 flex items-center justify-center mb-1.5 sm:mb-3 group-hover:scale-110 transition-transform duration-300">
+                <span className="text-xl sm:text-3xl">{niche.icon || '🛠️'}</span>
               </div>
-              <span className="font-bold text-sm text-gray-900">{t('niches.' + niche.slug.replace(/-/g, '_'), { defaultValue: niche.name })}</span>
-              <span className="text-xs text-gray-400 mt-1">{niche._count?.services || 0} {t('categories.services')}</span>
+              <span className="font-bold text-[11px] sm:text-sm text-gray-900 leading-tight">{t('niches.' + niche.slug.replace(/-/g, '_'), { defaultValue: niche.name })}</span>
+              <span className="text-[10px] sm:text-xs text-gray-400 mt-0.5">{niche._count?.services || 0} {t('categories.services')}</span>
             </Link>
           ))}
         </div>
