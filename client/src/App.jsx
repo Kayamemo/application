@@ -47,7 +47,7 @@ function ProtectedRoute({ allowedRoles }) {
 function MainLayout() {
   return (
     <div className="min-h-screen flex flex-col">
-      <main className="flex-1 pb-16 md:pb-0">
+      <main className="flex-1 flex flex-col pb-16 md:pb-0">
         <Outlet />
       </main>
       <Footer />
@@ -60,7 +60,7 @@ function MainLayoutWithHeader() {
   return (
     <div className="min-h-screen flex flex-col">
       <SlimHeader />
-      <main className="flex-1 pb-16 md:pb-0">
+      <main className="flex-1 flex flex-col pb-16 md:pb-0">
         <Outlet />
       </main>
       <Footer />
