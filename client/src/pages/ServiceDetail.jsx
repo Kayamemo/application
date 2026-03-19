@@ -64,15 +64,19 @@ export default function ServiceDetail() {
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center gap-3">
           <BackButton />
-          <nav className="text-sm text-gray-400 flex items-center gap-1">
-            <Link to="/" className="hover:text-primary-600 transition-colors">{t('detail.home')}</Link>
-            <span>/</span>
-            <Link to={`/explore?niche=${service.niche?.slug}`} className="hover:text-primary-600 transition-colors">
+          <nav className="hidden sm:flex text-sm text-gray-400 items-center gap-1 min-w-0">
+            <Link to="/" className="hover:text-primary-600 transition-colors shrink-0">{t('detail.home')}</Link>
+            <span className="shrink-0">/</span>
+            <Link to={`/explore?niche=${service.niche?.slug}`} className="hover:text-primary-600 transition-colors shrink-0">
               {service.niche?.icon} {service.niche?.name}
             </Link>
-            <span>/</span>
-            <span className="text-gray-600 truncate max-w-[200px]">{service.title}</span>
+            <span className="shrink-0">/</span>
+            <span className="text-gray-600 truncate">{service.title}</span>
           </nav>
+          {/* Mobile: show category link instead of full breadcrumb */}
+          <Link to={`/explore?niche=${service.niche?.slug}`} className="sm:hidden text-sm text-gray-500 flex items-center gap-1">
+            {service.niche?.icon} {service.niche?.name}
+          </Link>
         </div>
       </div>
 
@@ -94,7 +98,7 @@ export default function ServiceDetail() {
                   </span>
                 )}
               </div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 leading-tight">
                 {service.title}
               </h1>
             </div>
