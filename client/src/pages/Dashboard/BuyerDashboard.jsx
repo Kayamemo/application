@@ -44,13 +44,14 @@ export default function BuyerDashboard() {
   });
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-5">
+    <div className="w-full overflow-x-hidden">
+    <div className="max-w-3xl mx-auto px-4 py-5">
 
       {/* Header */}
-      <div className="flex items-center gap-3 mb-5">
+      <div className="flex items-center gap-2 mb-5">
         <BackButton />
-        <h1 className="font-bold text-lg flex-1">{t('buyerDash.title')}</h1>
-        <Link to="/explore" className="btn-primary text-xs py-1.5 px-3 shrink-0">{t('buyerDash.browse')}</Link>
+        <h1 className="font-bold text-base flex-1 min-w-0 truncate">{t('buyerDash.title')}</h1>
+        <Link to="/explore" className="btn-primary text-xs py-1.5 px-3 shrink-0 whitespace-nowrap">{t('buyerDash.browse')}</Link>
       </div>
 
       {/* Status tabs */}
@@ -85,20 +86,16 @@ export default function BuyerDashboard() {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="font-semibold text-sm text-gray-900 truncate">{order.service?.title}</p>
+                  <p className="font-semibold text-sm text-gray-900 truncate leading-snug">{order.service?.title}</p>
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
                     <Badge label={order.status} />
+                    <span className="text-xs text-gray-400 truncate">{order.seller?.name}</span>
+                    <span className="text-xs font-bold text-gray-700">${parseFloat(order.amount).toFixed(0)}</span>
                   </div>
-                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
-                    <span className="text-xs text-gray-400">{order.seller?.name}</span>
-                    <span className="text-xs font-semibold text-gray-700">${parseFloat(order.amount).toFixed(0)}</span>
-                    <span className="text-xs text-gray-400">{format(new Date(order.createdAt), 'MMM d, yyyy')}</span>
-                    {order.dueDate && (
-                      <span className="text-xs text-orange-500 font-medium">
-                        Due {format(new Date(order.dueDate), 'MMM d')}
-                      </span>
-                    )}
-                  </div>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {format(new Date(order.createdAt), 'MMM d, yyyy')}
+                    {order.dueDate && <span className="text-orange-500 font-medium ml-2">· Due {format(new Date(order.dueDate), 'MMM d')}</span>}
+                  </p>
                 </div>
               </div>
 
@@ -176,6 +173,7 @@ export default function BuyerDashboard() {
         </div>
       )}
 
+    </div>
     </div>
   );
 }
