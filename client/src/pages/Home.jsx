@@ -172,14 +172,30 @@ export default function Home() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-primary-500/10 rounded-full blur-3xl" />
         </div>
 
-        {/* ── Top bar: logo + auth ── */}
+        {/* ── Top bar: logo + nav + auth ── */}
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2 shrink-0">
             <div className="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
               <span className="text-white font-black text-sm">K</span>
             </div>
             <span className="text-xl font-black tracking-tight text-white">Kaya</span>
           </Link>
+
+          {/* Center nav — desktop only */}
+          <nav className="hidden md:flex items-center gap-1">
+            {[
+              { to: '/explore', label: t('nav.browse') || 'Explore' },
+              ...(user ? [{ to: (user.role === 'SELLER' || user.role === 'ADMIN') ? '/dashboard/seller' : '/dashboard', label: (user.role === 'SELLER' || user.role === 'ADMIN') ? t('nav.navDashboard') || 'Dashboard' : t('nav.myOrders') || 'Orders' }] : []),
+            ].map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className="px-3.5 py-1.5 rounded-xl text-sm font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-all"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
 
           <div className="flex items-center gap-2" ref={userMenuRef}>
             <LangToggle variant="light" />
