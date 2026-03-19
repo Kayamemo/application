@@ -123,10 +123,9 @@ export default function Chat() {
   const conv = convData?.conversation;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 h-[calc(100vh-5rem)]">
-      <div className="flex h-full gap-4">
+    <div className="flex-1 flex flex-col md:flex-row md:gap-4 md:p-4 md:max-w-6xl md:mx-auto md:w-full overflow-hidden" style={{ minHeight: 0 }}>
         {/* Conversation list — full screen on mobile when no conversation selected */}
-        <aside className={`flex-shrink-0 card flex flex-col overflow-hidden w-full md:w-72 ${conversationId ? 'hidden md:flex' : 'flex'}`}>
+        <aside className={`flex flex-col overflow-hidden bg-white border-r border-gray-100 md:rounded-2xl md:border md:border-gray-100 md:shadow-sm md:w-72 md:shrink-0 ${conversationId ? 'hidden md:flex' : 'flex flex-1'}`}>
           <div className="p-3 border-b border-gray-100 flex items-center gap-2">
             <BackButton />
             <h2 className="font-bold text-gray-900">{t('chat.messages')}</h2>
@@ -157,7 +156,7 @@ export default function Chat() {
         </aside>
 
         {/* Message thread — full screen on mobile when conversation selected */}
-        <div className={`flex-1 card flex flex-col overflow-hidden ${conversationId ? 'flex' : 'hidden md:flex'}`}>
+        <div className={`flex flex-col overflow-hidden flex-1 bg-white md:rounded-2xl md:border md:border-gray-100 md:shadow-sm ${conversationId ? 'flex' : 'hidden md:flex'}`}>
           {conversationId && conv ? (
             <>
               {/* Header */}
@@ -240,7 +239,7 @@ export default function Chat() {
             </div>
           )}
         </div>
-      </div>
     </div>
   );
 }
+
