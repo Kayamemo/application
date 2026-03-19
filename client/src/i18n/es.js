@@ -210,7 +210,12 @@ export default {
   // ── Seller Dashboard ──────────────────────────────────
   sellerDash: {
     title:      'Panel de vendedor',
-    newService: '+ Nuevo servicio',
+    newService: 'Nuevo servicio',
+    stats: {
+      activeOrders:  'Pedidos activos',
+      totalEarnings: 'Ganancias totales',
+      services:      'Servicios',
+    },
     tabs: {
       orders:       '📦 Pedidos',
       services:     '🛠️ Mis servicios',

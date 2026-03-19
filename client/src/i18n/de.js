@@ -210,7 +210,12 @@ export default {
   // ── Seller Dashboard ──────────────────────────────────
   sellerDash: {
     title:      'Verkäufer-Dashboard',
-    newService: '+ Neuer Dienst',
+    newService: 'Neuer Dienst',
+    stats: {
+      activeOrders:  'Aktive Aufträge',
+      totalEarnings: 'Einnahmen gesamt',
+      services:      'Dienste',
+    },
     tabs: {
       orders:       '📦 Bestellungen',
       services:     '🛠️ Meine Dienste',

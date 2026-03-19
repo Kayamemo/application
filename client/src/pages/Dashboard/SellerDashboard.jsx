@@ -1,9 +1,9 @@
 // ============================================================
-// Seller Dashboard — Gig management, earnings, subscription
+// Seller Dashboard — clean redesign, desktop + mobile
 // ============================================================
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { servicesAPI, ordersAPI, paymentsAPI } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -16,30 +16,27 @@ export default function SellerDashboard() {
   const { user } = useAuth();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState('orders'); // orders | services | earnings | subscription
+  const [activeTab, setActiveTab] = useState('orders');
 
-  const { data: orders } = useQuery({
-    queryKey: ['seller-orders', activeTab],
+  // All fetched eagerly so stats bar always has data
+  const { data: ordersData } = useQuery({
+    queryKey: ['seller-orders'],
     queryFn: () => ordersAPI.list({ role: 'seller' }).then((r) => r.data),
-    enabled: activeTab === 'orders',
   });
 
   const { data: services } = useQuery({
     queryKey: ['my-services'],
     queryFn: () => servicesAPI.myServices().then((r) => r.data),
-    enabled: activeTab === 'services',
   });
 
   const { data: earnings } = useQuery({
     queryKey: ['earnings'],
     queryFn: () => paymentsAPI.getEarnings().then((r) => r.data),
-    enabled: activeTab === 'earnings',
   });
 
   const { data: subscription } = useQuery({
     queryKey: ['subscription'],
     queryFn: () => paymentsAPI.getSubscription().then((r) => r.data),
-    enabled: activeTab === 'subscription',
   });
 
   const deliverMutation = useMutation({
@@ -63,6 +60,9 @@ export default function SellerDashboard() {
     onSuccess: ({ data }) => { window.location.href = data.url; },
   });
 
+  const orders = ordersData?.orders || [];
+  const activeOrdersCount = orders.filter((o) => o.status === 'ACTIVE').length;
+
   const TABS = [
     { id: 'orders',       label: t('sellerDash.tabs.orders') },
     { id: 'services',     label: t('sellerDash.tabs.services') },
@@ -71,23 +71,47 @@ export default function SellerDashboard() {
   ];
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
+      {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div className="flex items-center gap-3">
           <BackButton />
-          <h1 className="text-xl sm:text-2xl font-bold">{t('sellerDash.title')}</h1>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold">{t('sellerDash.title')}</h1>
+            <p className="text-sm text-gray-400 mt-0.5">{user?.name}</p>
+          </div>
         </div>
-        <Link to="/services/new" className="btn-primary text-sm w-full sm:w-auto text-center">{t('sellerDash.newService')}</Link>
+        <Link to="/services/new" className="btn-primary text-sm w-full sm:w-auto text-center">
+          + {t('sellerDash.newService')}
+        </Link>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 mb-6 border-b border-gray-200 overflow-x-auto">
+      {/* ── Stats bar ── */}
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        {[
+          { label: t('sellerDash.stats.activeOrders'), value: activeOrdersCount, icon: '📦', color: 'text-blue-600' },
+          { label: t('sellerDash.stats.totalEarnings'), value: `$${parseFloat(earnings?.totalEarnings || 0).toFixed(0)}`, icon: '💰', color: 'text-green-600' },
+          { label: t('sellerDash.stats.services'), value: services?.length || 0, icon: '🛠️', color: 'text-violet-600' },
+        ].map((stat) => (
+          <div key={stat.label} className="card p-3 sm:p-4 text-center">
+            <p className="text-xl sm:text-2xl">{stat.icon}</p>
+            <p className={`text-lg sm:text-2xl font-black mt-1 ${stat.color}`}>{stat.value}</p>
+            <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5 leading-tight">{stat.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Pill tabs ── */}
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-              activeTab === tab.id ? 'border-primary-600 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+            className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
+              activeTab === tab.id
+                ? 'bg-primary-600 text-white shadow-md'
+                : 'bg-white border border-gray-200 text-gray-500 hover:border-primary-300 hover:text-primary-600'
             }`}
           >
             {tab.label}
@@ -98,31 +122,42 @@ export default function SellerDashboard() {
       {/* ── Orders Tab ── */}
       {activeTab === 'orders' && (
         <div className="space-y-3">
-          {!orders?.orders?.length && <div className="text-center py-12 text-gray-400">{t('sellerDash.orders.empty')}</div>}
-          {orders?.orders?.map((order) => (
+          {!orders.length && (
+            <div className="text-center py-16 text-gray-400">
+              <div className="text-5xl mb-3">📦</div>
+              <p className="font-medium">{t('sellerDash.orders.empty')}</p>
+            </div>
+          )}
+          {orders.map((order) => (
             <div key={order.id} className="card p-4">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                <div className="flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-semibold text-sm">{order.service?.title}</h3>
+              <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                    <h3 className="font-bold text-base text-gray-900 truncate">{order.service?.title}</h3>
                     <Badge label={order.status} />
                   </div>
-                  <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-400">
-                    <span>{t('sellerDash.orders.buyer')} {order.buyer?.name}</span>
-                    <span>{t('sellerDash.orders.earnings')} ${parseFloat(order.sellerEarnings).toFixed(2)}</span>
-                    <span>{t('sellerDash.orders.due')} {order.dueDate ? format(new Date(order.dueDate), 'MMM d') : t('sellerDash.orders.na')}</span>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
+                    <span>👤 {order.buyer?.name}</span>
+                    <span>💰 ${parseFloat(order.sellerEarnings).toFixed(2)}</span>
+                    <span>📅 {order.dueDate ? format(new Date(order.dueDate), 'MMM d') : t('sellerDash.orders.na')}</span>
                   </div>
                   {order.requirements && (
-                    <p className="text-xs text-gray-600 mt-1 bg-gray-50 rounded px-2 py-1">📝 {order.requirements}</p>
+                    <p className="text-xs text-gray-500 mt-2 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
+                      📝 {order.requirements}
+                    </p>
                   )}
                 </div>
-                <div className="flex gap-2">
-                  <Link to="/messages" className="btn-secondary text-xs py-1">{t('sellerDash.orders.chat')}</Link>
+                {/* Actions */}
+                <div className="flex gap-2 sm:flex-col sm:items-end shrink-0">
+                  <Link to="/messages" className="btn-secondary text-xs py-1.5 flex-1 sm:flex-none text-center">
+                    {t('sellerDash.orders.chat')}
+                  </Link>
                   {order.status === 'ACTIVE' && (
                     <button
                       onClick={() => deliverMutation.mutate(order.id)}
                       disabled={deliverMutation.isLoading}
-                      className="btn-primary text-xs py-1"
+                      className="btn-primary text-xs py-1.5 flex-1 sm:flex-none"
                     >
                       {t('sellerDash.orders.markDelivered')}
                     </button>
@@ -136,105 +171,127 @@ export default function SellerDashboard() {
 
       {/* ── Services Tab ── */}
       {activeTab === 'services' && (
-        <div className="space-y-3">
-          {!services?.length && (
-            <div className="text-center py-12 text-gray-400">
-              <p>{t('sellerDash.services.empty')}</p>
-              <Link to="/services/new" className="btn-primary text-sm mt-3 inline-block">{t('sellerDash.services.createFirst')}</Link>
+        <div>
+          {!services?.length ? (
+            <div className="text-center py-16 text-gray-400">
+              <div className="text-5xl mb-3">🛠️</div>
+              <p className="font-medium">{t('sellerDash.services.empty')}</p>
+              <Link to="/services/new" className="btn-primary text-sm mt-4 inline-block">
+                {t('sellerDash.services.createFirst')}
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              {services.map((svc) => (
+                <div key={svc.id} className="card overflow-hidden flex flex-col">
+                  {/* Thumbnail */}
+                  <div className="aspect-video bg-gray-100 flex items-center justify-center overflow-hidden">
+                    {svc.images?.[0]
+                      ? <img src={svc.images[0]} alt="" className="w-full h-full object-cover" />
+                      : <span className="text-4xl">{svc.niche?.icon || '🛠️'}</span>
+                    }
+                  </div>
+                  {/* Body */}
+                  <div className="p-4 flex flex-col flex-1">
+                    <h3 className="font-bold text-gray-900 leading-snug mb-1">{svc.title}</h3>
+                    <p className="text-sm text-gray-400 mb-2">
+                      {svc._count?.orders || 0} {t('sellerDash.services.orders')} · <span className="font-semibold text-gray-700">${parseFloat(svc.basePrice).toFixed(2)}</span>
+                    </p>
+                    <div className="mb-3">
+                      <Badge
+                        label={svc.isActive ? t('sellerDash.services.active') : t('sellerDash.services.paused')}
+                        variant={svc.isActive ? 'green' : 'gray'}
+                      />
+                    </div>
+                    <div className="flex gap-2 mt-auto">
+                      <Link to={`/services/${svc.id}`} className="btn-secondary text-xs py-1.5 flex-1 text-center">
+                        {t('sellerDash.services.view')}
+                      </Link>
+                      <button
+                        onClick={() => toggleServiceMutation.mutate({ id: svc.id, isActive: !svc.isActive })}
+                        className="btn-secondary text-xs py-1.5 flex-1"
+                      >
+                        {svc.isActive ? t('sellerDash.services.pause') : t('sellerDash.services.activate')}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
-          {services?.map((svc) => (
-            <div key={svc.id} className="card p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-14 h-14 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
-                  {svc.images?.[0]
-                    ? <img src={svc.images[0]} alt="" className="w-full h-full object-cover" />
-                    : <div className="w-full h-full flex items-center justify-center text-2xl">{svc.niche?.icon || '🛠️'}</div>
-                  }
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm truncate">{svc.title}</h3>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    {svc._count?.orders || 0} {t('sellerDash.services.orders')} · ${parseFloat(svc.basePrice).toFixed(2)}
-                  </p>
-                  <Badge
-                    label={svc.isActive ? t('sellerDash.services.active') : t('sellerDash.services.paused')}
-                    variant={svc.isActive ? 'green' : 'gray'}
-                  />
-                </div>
-              </div>
-              <div className="flex gap-2 mt-3">
-                <Link to={`/services/${svc.id}`} className="btn-secondary text-xs py-1.5 flex-1 text-center">{t('sellerDash.services.view')}</Link>
-                <button
-                  onClick={() => toggleServiceMutation.mutate({ id: svc.id, isActive: !svc.isActive })}
-                  className="btn-secondary text-xs py-1.5 flex-1"
-                >
-                  {svc.isActive ? t('sellerDash.services.pause') : t('sellerDash.services.activate')}
-                </button>
-              </div>
-            </div>
-          ))}
         </div>
       )}
 
       {/* ── Earnings Tab ── */}
-      {activeTab === 'earnings' && earnings && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            { label: t('sellerDash.earnings.total'),    value: earnings.totalEarnings,    color: 'text-green-600' },
-            { label: t('sellerDash.earnings.escrow'),   value: earnings.pendingEarnings,  color: 'text-yellow-600' },
-            { label: t('sellerDash.earnings.released'), value: earnings.releasedEarnings, color: 'text-blue-600' },
-          ].map((stat) => (
-            <div key={stat.label} className="card p-5 text-center">
-              <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{stat.label}</p>
-              <p className={`text-3xl font-bold ${stat.color}`}>${parseFloat(stat.value || 0).toFixed(2)}</p>
-            </div>
-          ))}
-          <div className="sm:col-span-3 text-sm text-gray-500 text-center">
-            {t('sellerDash.earnings.note')}
+      {activeTab === 'earnings' && (
+        <div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+            {[
+              { label: t('sellerDash.earnings.total'),    value: earnings?.totalEarnings,    color: 'text-green-600',  bg: 'bg-green-50',  icon: '💰' },
+              { label: t('sellerDash.earnings.escrow'),   value: earnings?.pendingEarnings,  color: 'text-yellow-600', bg: 'bg-yellow-50', icon: '🔒' },
+              { label: t('sellerDash.earnings.released'), value: earnings?.releasedEarnings, color: 'text-blue-600',   bg: 'bg-blue-50',   icon: '✅' },
+            ].map((stat) => (
+              <div key={stat.label} className={`card p-5 text-center ${stat.bg}`}>
+                <p className="text-2xl mb-1">{stat.icon}</p>
+                <p className={`text-3xl font-black ${stat.color}`}>${parseFloat(stat.value || 0).toFixed(2)}</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wide mt-1">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+          <div className="card p-4 text-sm text-gray-500 flex items-start gap-2">
+            <span className="text-base shrink-0">ℹ️</span>
+            <span>{t('sellerDash.earnings.note')}</span>
           </div>
         </div>
       )}
 
       {/* ── Subscription Tab ── */}
       {activeTab === 'subscription' && subscription && (
-        <div className="card p-6 max-w-sm">
-          <h2 className="font-bold text-lg mb-3">{t('sellerDash.subscription.title')}</h2>
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-500">{t('sellerDash.subscription.status')}</span>
-              <Badge label={subscription.profile?.subscriptionStatus} />
-            </div>
-            {subscription.profile?.subscriptionEndsAt && (
-              <div className="flex justify-between">
-                <span className="text-gray-500">{t('sellerDash.subscription.renewsEnds')}</span>
-                <span>{format(new Date(subscription.profile.subscriptionEndsAt), 'MMM d, yyyy')}</span>
+        <div className="max-w-sm">
+          <div className="card overflow-hidden">
+            {/* Gradient banner */}
+            <div className="h-20 bg-gradient-to-r from-indigo-500 to-violet-600 flex items-center px-5">
+              <div>
+                <p className="text-white font-black text-lg">{t('sellerDash.subscription.title')}</p>
+                <p className="text-white/70 text-xs">{t('sellerDash.subscription.planValue')}</p>
               </div>
-            )}
-            {subscription.profile?.trialEndsAt && (
-              <div className="flex justify-between">
-                <span className="text-gray-500">{t('sellerDash.subscription.trialEnds')}</span>
-                <span>{format(new Date(subscription.profile.trialEndsAt), 'MMM d, yyyy')}</span>
-              </div>
-            )}
-            <div className="flex justify-between font-semibold">
-              <span>{t('sellerDash.subscription.plan')}</span>
-              <span>{t('sellerDash.subscription.planValue')}</span>
             </div>
-          </div>
-          <div className="mt-4 space-y-2">
-            {subscription.profile?.stripeSubscriptionId ? (
-              <button
-                onClick={() => billingPortalMutation.mutate()}
-                className="btn-secondary w-full"
-              >
-                {t('sellerDash.subscription.manage')}
-              </button>
-            ) : (
-              <Link to="/subscribe" className="btn-primary w-full block text-center">
-                {t('sellerDash.subscription.subscribe')}
-              </Link>
-            )}
+            <div className="p-5 space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-500">{t('sellerDash.subscription.status')}</span>
+                <Badge label={subscription.profile?.subscriptionStatus} />
+              </div>
+              {subscription.profile?.subscriptionEndsAt && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">{t('sellerDash.subscription.renewsEnds')}</span>
+                  <span className="font-medium">{format(new Date(subscription.profile.subscriptionEndsAt), 'MMM d, yyyy')}</span>
+                </div>
+              )}
+              {subscription.profile?.trialEndsAt && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">{t('sellerDash.subscription.trialEnds')}</span>
+                  <span className="font-medium">{format(new Date(subscription.profile.trialEndsAt), 'MMM d, yyyy')}</span>
+                </div>
+              )}
+              <div className="flex justify-between font-semibold">
+                <span>{t('sellerDash.subscription.plan')}</span>
+                <span>{t('sellerDash.subscription.planValue')}</span>
+              </div>
+              <div className="pt-2">
+                {subscription.profile?.stripeSubscriptionId ? (
+                  <button
+                    onClick={() => billingPortalMutation.mutate()}
+                    className="btn-secondary w-full"
+                  >
+                    {t('sellerDash.subscription.manage')}
+                  </button>
+                ) : (
+                  <Link to="/subscribe" className="btn-primary w-full block text-center">
+                    {t('sellerDash.subscription.subscribe')}
+                  </Link>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}
