@@ -325,6 +325,40 @@ async function main() {
     ],
   }, demoPassword);
 
+  // ─── Ensure all demo services are visible everywhere ─────────
+  // (covers sellers created in earlier seed runs without lat/lng)
+  const demoEmails = [
+    'demo-seller@kaya.app', 'marco.tutor@kaya.app', 'sofia.clean@kaya.app',
+    'lucas.pets@kaya.app',  'anna.photo@kaya.app',  'tom.trainer@kaya.app',
+    'hannah.cook@kaya.app', 'max.repairs@kaya.app',
+  ];
+  const demoSellers = await prisma.user.findMany({
+    where: { email: { in: demoEmails } },
+    select: { id: true, email: true },
+  });
+
+  // Location coords per email
+  const coords = {
+    'demo-seller@kaya.app': { lat: 52.5200, lng: 13.4050 },
+    'marco.tutor@kaya.app': { lat: 52.5200, lng: 13.4050 },
+    'sofia.clean@kaya.app': { lat: 48.1351, lng: 11.5820 },
+    'lucas.pets@kaya.app':  { lat: 53.5511, lng: 9.9937  },
+    'anna.photo@kaya.app':  { lat: 52.5200, lng: 13.4050 },
+    'tom.trainer@kaya.app': { lat: 50.1109, lng: 8.6821  },
+    'hannah.cook@kaya.app': { lat: 50.9333, lng: 6.9500  },
+    'max.repairs@kaya.app': { lat: 48.7758, lng: 9.1829  },
+  };
+
+  for (const seller of demoSellers) {
+    const c = coords[seller.email];
+    if (!c) continue;
+    await prisma.service.updateMany({
+      where: { sellerId: seller.id, OR: [{ lat: null }, { lng: null }] },
+      data: { lat: c.lat, lng: c.lng, isActive: true },
+    });
+  }
+  console.log(`✅ Demo service coords ensured`);
+
   console.log('\n🎉 Seed complete!');
 }
 
