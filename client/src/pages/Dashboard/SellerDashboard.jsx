@@ -61,7 +61,10 @@ export default function SellerDashboard() {
       queryClient.invalidateQueries(['my-services']);
       toast.success(t('sellerDash.services.deleted'));
     },
-    onError: () => toast.error(t('sellerDash.services.deleteFail')),
+    onError: (err) => {
+      const msg = err?.response?.data?.error;
+      toast.error(msg || t('sellerDash.services.deleteFail'));
+    },
   });
 
   const billingPortalMutation = useMutation({

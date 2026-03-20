@@ -398,23 +398,32 @@ router.patch(
   }
 );
 
-// ─── DELETE /api/services/:id — Deactivate service ────────────
+// ─── DELETE /api/services/:id — Permanently delete service ────
 router.delete('/:id', authenticate, async (req, res, next) => {
   try {
     const service = await prisma.service.findUnique({
       where: { id: req.params.id },
-      select: { sellerId: true },
+      select: { sellerId: true, _count: { select: { orders: true } } },
     });
     if (!service) return res.status(404).json({ error: 'Service not found' });
     if (service.sellerId !== req.user.id && req.user.role !== 'ADMIN') {
       return res.status(403).json({ error: 'Not authorized' });
     }
+    if (service._count.orders > 0) {
+      return res.status(400).json({ error: 'Cannot delete a service that has orders. Pause it instead.' });
+    }
 
-    await prisma.service.update({
-      where: { id: req.params.id },
-      data: { isActive: false },
-    });
-    res.json({ message: 'Service deactivated' });
+    await prisma.$transaction([
+      // Conversations reference service optionally — unlink them first
+      prisma.conversation.updateMany({
+        where: { serviceId: req.params.id },
+        data: { serviceId: null },
+      }),
+      // Now delete (cascades to ServicePackage automatically)
+      prisma.service.delete({ where: { id: req.params.id } }),
+    ]);
+
+    res.json({ message: 'Service deleted' });
   } catch (err) {
     next(err);
   }
