@@ -57,8 +57,8 @@ export default function SellerDashboard() {
 
   const deleteServiceMutation = useMutation({
     mutationFn: (id) => servicesAPI.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['my-services']);
+    onSuccess: (_, id) => {
+      queryClient.setQueryData(['my-services'], (old) => old?.filter((s) => s.id !== id) ?? []);
       toast.success(t('sellerDash.services.deleted'));
     },
     onError: (err) => {

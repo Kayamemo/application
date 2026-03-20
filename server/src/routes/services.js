@@ -67,7 +67,7 @@ router.get('/', optionalAuth, async (req, res, next) => {
       }
 
       const baseWhere = `
-        s.is_active = true AND s.is_deleted = false
+        s.is_active = true
         AND (
           s.is_remote = true
           OR (
@@ -154,7 +154,7 @@ router.get('/', optionalAuth, async (req, res, next) => {
     }
 
     // ── Standard (non-geo) query ──────────────────────────────
-    const where = { isActive: true, isDeleted: false };
+    const where = { isActive: true };
 
     if (niche) {
       where.niche = { slug: niche };
@@ -233,7 +233,7 @@ router.get('/', optionalAuth, async (req, res, next) => {
 router.get('/seller/me', authenticate, requireRole('SELLER', 'ADMIN'), async (req, res, next) => {
   try {
     const services = await prisma.service.findMany({
-      where: { sellerId: req.user.id, isDeleted: false },
+      where: { sellerId: req.user.id },
       include: {
         niche: { select: { name: true, icon: true } },
         packages: true,
@@ -412,7 +412,7 @@ router.delete('/:id', authenticate, async (req, res, next) => {
 
     await prisma.service.update({
       where: { id: req.params.id },
-      data: { isDeleted: true, isActive: false },
+      data: { isActive: false },
     });
 
     res.json({ message: 'Service deleted' });
