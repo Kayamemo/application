@@ -159,6 +159,7 @@ model Service {
   images        String[]  // Array of image URLs
   tags          String[]
   isActive      Boolean   @default(true)
+  isDeleted     Boolean   @default(false)
 
   // Location & availability
   location      String?

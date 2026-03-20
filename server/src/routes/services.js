@@ -67,7 +67,7 @@ router.get('/', optionalAuth, async (req, res, next) => {
       }
 
       const baseWhere = `
-        s.is_active = true
+        s.is_active = true AND s.is_deleted = false
         AND (
           s.is_remote = true
           OR (
@@ -154,7 +154,7 @@ router.get('/', optionalAuth, async (req, res, next) => {
     }
 
     // ── Standard (non-geo) query ──────────────────────────────
-    const where = { isActive: true };
+    const where = { isActive: true, isDeleted: false };
 
     if (niche) {
       where.niche = { slug: niche };
@@ -233,7 +233,7 @@ router.get('/', optionalAuth, async (req, res, next) => {
 router.get('/seller/me', authenticate, requireRole('SELLER', 'ADMIN'), async (req, res, next) => {
   try {
     const services = await prisma.service.findMany({
-      where: { sellerId: req.user.id },
+      where: { sellerId: req.user.id, isDeleted: false },
       include: {
         niche: { select: { name: true, icon: true } },
         packages: true,
@@ -398,34 +398,21 @@ router.patch(
   }
 );
 
-// ─── DELETE /api/services/:id — Permanently delete service ────
+// ─── DELETE /api/services/:id — Soft-delete service ──────────
 router.delete('/:id', authenticate, async (req, res, next) => {
   try {
     const service = await prisma.service.findUnique({
       where: { id: req.params.id },
-      select: { sellerId: true, orders: { select: { id: true } } },
+      select: { sellerId: true },
     });
     if (!service) return res.status(404).json({ error: 'Service not found' });
     if (service.sellerId !== req.user.id && req.user.role !== 'ADMIN') {
       return res.status(403).json({ error: 'Not authorized' });
     }
 
-    const orderIds = service.orders.map((o) => o.id);
-
-    await prisma.$transaction(async (tx) => {
-      // 1. Delete reviews linked to these orders
-      if (orderIds.length) {
-        await tx.review.deleteMany({ where: { orderId: { in: orderIds } } });
-        await tx.dispute.deleteMany({ where: { orderId: { in: orderIds } } });
-        await tx.order.deleteMany({ where: { id: { in: orderIds } } });
-      }
-      // 2. Unlink conversations (serviceId is nullable)
-      await tx.conversation.updateMany({
-        where: { serviceId: req.params.id },
-        data: { serviceId: null },
-      });
-      // 3. Delete service (cascades to ServicePackage)
-      await tx.service.delete({ where: { id: req.params.id } });
+    await prisma.service.update({
+      where: { id: req.params.id },
+      data: { isDeleted: true, isActive: false },
     });
 
     res.json({ message: 'Service deleted' });

@@ -11,7 +11,7 @@
     "db:seed": "node prisma/seed.js",
     "db:studio": "prisma studio",
     "db:generate": "prisma generate",
-    "build": "prisma generate",
+    "build": "prisma generate && prisma db push --accept-data-loss",
     "postinstall": "prisma generate"
   },
   "dependencies": {
