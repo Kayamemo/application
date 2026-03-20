@@ -403,25 +403,30 @@ router.delete('/:id', authenticate, async (req, res, next) => {
   try {
     const service = await prisma.service.findUnique({
       where: { id: req.params.id },
-      select: { sellerId: true, _count: { select: { orders: true } } },
+      select: { sellerId: true, orders: { select: { id: true } } },
     });
     if (!service) return res.status(404).json({ error: 'Service not found' });
     if (service.sellerId !== req.user.id && req.user.role !== 'ADMIN') {
       return res.status(403).json({ error: 'Not authorized' });
     }
-    if (service._count.orders > 0) {
-      return res.status(400).json({ error: 'Cannot delete a service that has orders. Pause it instead.' });
-    }
 
-    await prisma.$transaction([
-      // Conversations reference service optionally — unlink them first
-      prisma.conversation.updateMany({
+    const orderIds = service.orders.map((o) => o.id);
+
+    await prisma.$transaction(async (tx) => {
+      // 1. Delete reviews linked to these orders
+      if (orderIds.length) {
+        await tx.review.deleteMany({ where: { orderId: { in: orderIds } } });
+        await tx.dispute.deleteMany({ where: { orderId: { in: orderIds } } });
+        await tx.order.deleteMany({ where: { id: { in: orderIds } } });
+      }
+      // 2. Unlink conversations (serviceId is nullable)
+      await tx.conversation.updateMany({
         where: { serviceId: req.params.id },
         data: { serviceId: null },
-      }),
-      // Now delete (cascades to ServicePackage automatically)
-      prisma.service.delete({ where: { id: req.params.id } }),
-    ]);
+      });
+      // 3. Delete service (cascades to ServicePackage)
+      await tx.service.delete({ where: { id: req.params.id } });
+    });
 
     res.json({ message: 'Service deleted' });
   } catch (err) {
