@@ -8,6 +8,7 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function createSellerWithServices(sellerData, password) {
+  try {
   const existing = await prisma.user.findUnique({ where: { email: sellerData.email } });
   if (existing) {
     console.log(`ℹ️  Already exists: ${sellerData.name}`);
@@ -53,12 +54,17 @@ async function createSellerWithServices(sellerData, password) {
         deliveryDays: svc.deliveryDays,
         isRemote: svc.isRemote ?? false,
         location: svc.location || sellerData.location,
+        lat: svc.lat ?? sellerData.lat ?? null,
+        lng: svc.lng ?? sellerData.lng ?? null,
         isActive: true,
         packages: { create: svc.packages },
       },
     });
   }
   console.log(`✅ Created: ${sellerData.name}`);
+  } catch (e) {
+    console.error(`❌ Failed to create ${sellerData.name}:`, e.message);
+  }
 }
 
 async function main() {
@@ -110,6 +116,7 @@ async function main() {
     name: 'Jane the Gardener',
     bio: 'Professional gardener with 10 years of experience. Residential and commercial.',
     location: 'Berlin, Germany',
+    lat: 52.5200, lng: 13.4050,
     tagline: 'Your garden, my passion',
     avgRating: 4.8, totalReviews: 12, totalOrders: 15,
     skills: ['Lawn Mowing', 'Planting', 'Landscaping'],
@@ -135,6 +142,7 @@ async function main() {
     name: 'Marco Bianchi',
     bio: 'University mathematics professor. I make complex topics simple and fun for all ages.',
     location: 'Berlin, Germany',
+    lat: 52.5200, lng: 13.4050,
     tagline: 'Math & Science made easy',
     avgRating: 4.9, totalReviews: 34, totalOrders: 40,
     skills: ['Mathematics', 'Physics', 'Statistics'],
@@ -160,6 +168,7 @@ async function main() {
     name: 'Sofia Meier',
     bio: 'Professional cleaner with 8 years experience. Eco-friendly products, reliable and thorough.',
     location: 'Munich, Germany',
+    lat: 48.1351, lng: 11.5820,
     tagline: 'Your home, spotlessly clean',
     avgRating: 4.7, totalReviews: 58, totalOrders: 65,
     skills: ['Deep Cleaning', 'Move-out Cleaning', 'Office Cleaning'],
@@ -186,6 +195,7 @@ async function main() {
     name: 'Lucas Weber',
     bio: 'Animal lover and certified dog trainer. I treat every pet like my own. 7 days a week.',
     location: 'Hamburg, Germany',
+    lat: 53.5511, lng: 9.9937,
     tagline: 'Professional care for your furry friends',
     avgRating: 5.0, totalReviews: 21, totalOrders: 25,
     skills: ['Dog Walking', 'Pet Sitting', 'Dog Training'],
@@ -212,6 +222,7 @@ async function main() {
     name: 'Anna Schulz',
     bio: 'Freelance photographer specialising in portraits, events and product photography. 6 years experience.',
     location: 'Berlin, Germany',
+    lat: 52.5200, lng: 13.4050,
     tagline: 'Capturing your best moments',
     avgRating: 4.8, totalReviews: 29, totalOrders: 33,
     skills: ['Portrait Photography', 'Event Photography', 'Product Photography'],
@@ -238,6 +249,7 @@ async function main() {
     name: 'Tom Fischer',
     bio: 'Certified personal trainer and nutritionist. Helped 200+ clients reach their fitness goals.',
     location: 'Frankfurt, Germany',
+    lat: 50.1109, lng: 8.6821,
     tagline: 'Your fitness transformation starts here',
     avgRating: 4.6, totalReviews: 47, totalOrders: 55,
     skills: ['Weight Loss', 'Muscle Building', 'Nutrition Planning'],
@@ -264,6 +276,7 @@ async function main() {
     name: 'Hannah Müller',
     bio: 'Passionate home chef and cooking teacher. Specialising in healthy Mediterranean and German cuisine.',
     location: 'Cologne, Germany',
+    lat: 50.9333, lng: 6.9500,
     tagline: 'Delicious food, made with love',
     avgRating: 4.9, totalReviews: 19, totalOrders: 22,
     skills: ['Meal Prep', 'Cooking Lessons', 'Catering'],
@@ -290,6 +303,7 @@ async function main() {
     name: 'Max Hoffmann',
     bio: 'Licensed handyman with 15 years experience. No job too small. Fast, reliable, fairly priced.',
     location: 'Stuttgart, Germany',
+    lat: 48.7758, lng: 9.1829,
     tagline: 'Fix it right, fix it once',
     avgRating: 4.7, totalReviews: 83, totalOrders: 90,
     skills: ['Plumbing', 'Electrical', 'Furniture Assembly'],
