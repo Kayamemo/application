@@ -55,6 +55,15 @@ export default function SellerDashboard() {
     },
   });
 
+  const deleteServiceMutation = useMutation({
+    mutationFn: (id) => servicesAPI.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['my-services']);
+      toast.success(t('sellerDash.services.deleted'));
+    },
+    onError: () => toast.error(t('sellerDash.services.deleteFail')),
+  });
+
   const billingPortalMutation = useMutation({
     mutationFn: () => paymentsAPI.getBillingPortal(),
     onSuccess: ({ data }) => { window.location.href = data.url; },
@@ -234,6 +243,19 @@ export default function SellerDashboard() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                       )}
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (window.confirm(t('sellerDash.services.deleteConfirm'))) {
+                          deleteServiceMutation.mutate(svc.id);
+                        }
+                      }}
+                      disabled={deleteServiceMutation.isLoading}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-red-400 transition-colors disabled:opacity-40"
+                      title={t('sellerDash.services.delete')}>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
                     </button>
                   </div>
                 </div>
